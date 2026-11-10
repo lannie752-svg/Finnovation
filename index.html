@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Karat — Pixel Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--k:#12302a;--d:#2b5e4a;--g:#5f9f6e;--l:#a9d48c;--w:#dff2c0;--o:#e8743b;--y:#f4c542;--r:#e11d48;--p:#8b5cf6}
+body{font-family:'VT323','Courier New',monospace;font-size:20px;color:var(--k);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:14px;background:conic-gradient(#173d34 25%,#12302a 0 50%,#173d34 0 75%,#12302a 0) 0 0/28px 28px}
+.px,canvas{image-rendering:pixelated}
+.h,h2,h3,.btn,.badge,.tabs button,.logo,.stat b,.hud{font-family:'Press Start 2P','Courier New',monospace;font-weight:400}
+.side{max-width:280px;margin-right:34px;color:var(--w);font-size:20px;line-height:1.1;display:none}
+@media(min-width:880px){.side{display:block}}
+.side h1{font:400 22px 'Press Start 2P',monospace;color:var(--y);margin-bottom:10px}.side h4{font:400 11px 'Press Start 2P',monospace;margin:14px 0 6px;color:var(--l)}.side ol{padding-left:18px}.side li{margin-bottom:6px}
+.phone{position:relative;width:400px;height:800px;max-height:96vh;background:var(--l);border:8px solid var(--k);box-shadow:0 0 0 4px var(--g),14px 14px 0 #0009;display:flex;flex-direction:column;overflow:hidden}
+.top{padding:8px 10px;background:var(--d);border-bottom:4px solid var(--k);display:flex;align-items:center;gap:8px;color:var(--w)}
+.top .mid{flex:1}.lvl{font:400 8px 'Press Start 2P',monospace;color:var(--y)}
+.xp{height:12px;background:var(--k);border:2px solid var(--k);margin-top:4px}.xp i{display:block;height:100%;width:0;background:var(--y);transition:width .4s}
+.info{background:var(--w);color:var(--k);border:3px solid var(--k);width:28px;height:28px;font:400 12px 'Press Start 2P',monospace;cursor:pointer}
+.screen{flex:1;overflow-y:auto;padding:12px;background:radial-gradient(#98c47b 1px,transparent 1px) 0 0/8px 8px,var(--l);line-height:1}
+.screen::-webkit-scrollbar{width:8px}.screen::-webkit-scrollbar-thumb{background:var(--d)}
+.tabs{display:flex;background:var(--k);border-top:4px solid var(--k)}
+.tabs button{flex:1;border:0;background:none;padding:7px 0 6px;font-size:7px;color:var(--l);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px}
+.tabs button.on{color:var(--y);background:var(--d)}
+h2{font-size:13px;line-height:1.4;margin-bottom:6px}h3{font-size:10px;line-height:1.5;margin-bottom:6px}
+.sub{font-size:20px;color:var(--d);margin-bottom:10px;line-height:.95}
+.card{background:var(--w);border:4px solid var(--k);box-shadow:4px 4px 0 var(--k);padding:10px;margin-bottom:14px}
+.card p,.card li{font-size:20px;line-height:.95}
+.badge{display:inline-block;font-size:7px;background:var(--k);color:var(--w);padding:4px 6px;margin-bottom:6px}
+.badge.y{background:var(--y);color:var(--k)}.badge.g{background:var(--g);color:#fff}.badge.r{background:var(--r);color:#fff}
+.btn{display:block;width:100%;border:4px solid var(--k);padding:11px 6px;font-size:10px;line-height:1.4;color:var(--k);background:var(--y);box-shadow:0 4px 0 var(--k);cursor:pointer;margin-top:12px;text-align:center}
+.btn:active:not(:disabled){transform:translateY(4px);box-shadow:none}
+.btn.g{background:var(--g);color:#fff}.btn.d{background:var(--d);color:var(--w)}.btn.o{background:var(--o);color:#fff}.btn.r{background:var(--r);color:#fff}.btn.w{background:var(--w)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.opt{display:block;width:100%;text-align:left;background:var(--w);border:3px solid var(--k);padding:7px 8px;margin-top:8px;font:400 20px 'VT323',monospace;color:var(--k);cursor:pointer;line-height:.95}
+.opt:hover{background:#f3fbd9}.opt.on{background:var(--y)}.opt.good{background:#b9e6a0}.opt.bad{background:#f6b5b5}
+.back{background:none;border:0;color:var(--d);font:400 9px 'Press Start 2P',monospace;cursor:pointer;margin-bottom:10px}
+.fb{margin-top:10px;padding:8px;border:3px dashed var(--k);background:#fff8d6;font-size:20px;line-height:.95}
+.fb.good{background:#c9efb0}.fb.bad{background:#f8c4c4}.fb.warn{background:#ffe8a3}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}.g2{grid-template-columns:1fr 1fr}.g1{grid-template-columns:1fr}
+.stat{background:#fff8;border:3px solid var(--k);padding:6px 3px;text-align:center}.stat b{display:block;font-size:11px;margin-bottom:4px}.stat span{font-size:17px;line-height:.9;display:block}
+.seg{display:flex;gap:6px;margin:8px 0}
+.seg button{flex:1;border:3px solid var(--k);background:var(--w);padding:7px 2px;font:400 8px 'Press Start 2P',monospace;color:var(--k);cursor:pointer;line-height:1.4}
+.seg button.on{background:var(--y)}.seg button:disabled{opacity:.4}
+.lab{display:flex;justify-content:space-between;align-items:center;font-size:20px;margin-top:6px}
+input[type=range]{width:100%;accent-color:var(--d);margin:6px 0}
+input[type=text]{width:100%;background:#fff;border:3px solid var(--k);padding:6px;font:400 20px 'VT323',monospace;margin-top:8px}
+.ck{display:flex;gap:8px;align-items:flex-start;font-size:20px;margin-top:8px;line-height:.95}.ck input{margin-top:3px;accent-color:var(--d);width:16px;height:16px}
+.meter{height:16px;background:#fff;border:3px solid var(--k)}.meter i{display:block;height:100%;background:repeating-linear-gradient(90deg,var(--g) 0 6px,var(--d) 6px 8px)}
+.note{font-size:17px;color:var(--d);margin-top:6px;line-height:.9}
+.stack{display:flex;height:26px;border:3px solid var(--k);margin:8px 0;font-size:17px;color:#fff}.stack div{display:flex;align-items:center;justify-content:center}
+.tick{font:400 26px 'Press Start 2P',monospace;text-align:center;margin:10px 0}
+.mock{background:var(--k);color:var(--w);border:3px dashed var(--l);padding:8px;margin-top:8px;font-size:20px;line-height:.95}
+table{width:100%;border-collapse:collapse;font-size:19px;margin-top:8px}td,th{padding:4px 2px;border-bottom:2px solid var(--g);text-align:center}th{font:400 7px 'Press Start 2P',monospace}td.l,th.l{text-align:left}
+.toast{position:absolute;top:70px;left:50%;transform:translateX(-50%);background:var(--y);color:var(--k);font:400 9px 'Press Start 2P',monospace;padding:8px 10px;border:4px solid var(--k);z-index:9;animation:pop 1.9s forwards;white-space:nowrap}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,10px)}10%{opacity:1;transform:translate(-50%,0)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-8px)}}
+.ar{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:2px dashed var(--g);cursor:pointer}.ar:last-child{border:0}.ar b{display:block;font:400 9px 'Press Start 2P',monospace;line-height:1.5}.ar small{font-size:18px;color:var(--d)}
+.plots{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.plot{background:var(--w);border:4px solid var(--k);box-shadow:4px 4px 0 var(--k);padding:8px 4px;text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px}
+.plot:hover{background:#f3fbd9}.plot b{font:400 8px 'Press Start 2P',monospace;line-height:1.4}.plot span{font-size:22px}
+.sq{display:inline-block;width:8px;height:8px;margin-right:2px;border:2px solid var(--k);background:#fff}.sq.on{background:var(--r)}
+.pips{display:flex;justify-content:space-between;margin:10px 0 2px}
+.pip{width:52px;height:52px;border:4px solid var(--k);background:var(--w);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
+.pip.done{background:var(--g)}.pip.next{background:var(--y);animation:bl 1s steps(2) infinite}.pip.lock{background:#9aa;opacity:.6}
+.pip em{position:absolute;right:-4px;bottom:-6px;background:var(--k);color:var(--w);font:400 7px 'Press Start 2P',monospace;padding:2px}
+@keyframes bl{50%{background:#ffe27a}}
+.splash{text-align:center;padding-top:6px}.splash .big{font:400 26px 'Press Start 2P',monospace;color:var(--k);text-shadow:3px 3px 0 var(--y);margin:14px 0;line-height:1.3}
+.clock{display:none;align-items:center;gap:6px;padding:5px 8px;background:var(--k);color:var(--w);font-size:18px;border-bottom:3px solid var(--d)}
+.clock span{flex:1;white-space:nowrap}.clock button{border:3px solid var(--l);background:var(--d);color:var(--w);font:400 8px 'Press Start 2P',monospace;padding:5px 6px;cursor:pointer}.clock button.on{background:var(--y);color:var(--k)}
+.disc{text-align:center;font-size:16px;color:var(--w);padding:2px;background:var(--k)}
+</style>
+</head>
+<body>
+<div class="side">
+  <h1 id="sname"></h1>
+  <p>Pixel-game prototype of a beginner investing app. <b>All money is simulated</b>: fictional funds and prices. The name is a placeholder (<code>APP_NAME</code> in the script).</p>
+  <h4>DEMO PATH</h4>
+  <ol>
+    <li>GOALS tab: your rank, plus six measurable goals with bronze, silver and gold medals. Sort by priority or closest first.</li>
+    <li>PORTFOLIO: what you own. Balance, chart, gain or loss in dollars and percent, holdings, activity, suggestions.</li>
+    <li>MARKET: search companies, pick a goal, see matching funds, buy.</li>
+    <li>Use the clock bar (PLAY, +1D, +1W, +1M) to move time. Month 4 is a market dip.</li>
+    <li>BUDGET: see savings, debt, loans. Rearrange them.</li>
+    <li>LEARN: investment options, strategies and mind traps.</li>
+    <li>The i button: judges' notes and demo switches.</li>
+  </ol>
+</div>
+<div class="phone" id="phone">
+  <div class="top" id="top"><span id="hico"></span><div class="mid"><div class="lvl" id="hlvl"></div><div class="xp"><i id="hbar"></i></div></div><button class="info" onclick="nav('about',null)">i</button></div>
+  <div id="clock" class="clock"></div>
+  <div class="screen" id="screen"></div>
+  <div class="disc">SIMULATED MONEY · FICTIONAL FUNDS · EDUCATIONAL DEMO</div>
+  <div class="tabs" id="tabs"></div>
+</div>
+<script>
+const APP_NAME='Karat';
+const $=s=>document.querySelector(s);
+const fmt=n=>(n<0?'-':'')+'$'+Math.abs(Math.round(n)).toLocaleString();
+const fmt2=n=>'$'+n.toFixed(2);
+document.title=APP_NAME+' — Pixel Demo';$('#sname').textContent=APP_NAME;
+
+/* ---------- pixel sprites (drawn in code) ---------- */
+const PAL={k:'#12302a',d:'#2b5e4a',g:'#5f9f6e',l:'#a9d48c',w:'#dff2c0',o:'#e8743b',y:'#f4c542',Y:'#a16207',r:'#e11d48',p:'#8b5cf6',s:'#f2c9a0',b:'#7a4a2b',W:'#ffffff',e:'#94a3b8',c:'#38bdf8',B:'#1d4ed8'};
+const SPR={},URLS={};
+function mk(fn){const c=document.createElement('canvas');c.width=c.height=16;const g=c.getContext('2d');fn((x,y,col)=>{g.fillStyle=PAL[col]||col;g.fillRect(x,y,1,1)});return c}
+function mapS(rows){return mk(P=>rows.forEach((r,y)=>[...r].forEach((ch,x)=>{if(ch!=='.')P(x,y,ch)})))}
+function each(fn){for(let y=0;y<16;y++)for(let x=0;x<16;x++)fn(x,y,Math.hypot(x-7.5,y-7.5))}
+function initSprites(){
+ SPR.hero=mapS(['................','.....oooooo.....','....oooooooo....','...oooooooooo...','...ooossssooo...','...ooskssksoo...','...oossssssoo...','....osssssso....','...dgdgdgdgdg...','..sdgdgdgdgdgs..','..sdgdgdgdgdgs..','...dgdgdgdgdg...','...dddddddddd...','....kk....kk....','....kk....kk....','...kkk....kkk...']);
+ SPR.heart=mapS(['................','..rrrr....rrrr..','.rrWrrr..rrrrrr.','.rWrrrrrrrrrrrr.','.rrrrrrrrrrrrrr.','.rrrrrrrrrrrrrr.','..rrrrrrrrrrrr..','...rrrrrrrrrr...','....rrrrrrrr....','.....rrrrrr.....','......rrrr......','.......rr.......','................','................','................','................']);
+ SPR.coin=mk(P=>each((x,y,d)=>{if(d<=6.4)P(x,y,d>5.2?'Y':'y');if((x==5||x==6)&&(y==4||y==5)&&d<5)P(x,y,'W');if((x==7||x==8)&&y>4&&y<11)P(x,y,'Y')}));
+ SPR.tree=mk(P=>{for(let y=10;y<16;y++){P(7,y,'b');P(8,y,'b')}each((x,y,d)=>{const e=Math.hypot(x-7.5,(y-6)*1.1);if(y<14&&e<6.4)P(x,y,e>5.2?'d':(x+y)%5==0?'l':'g')})});
+ SPR.globe=mk(P=>each((x,y,d)=>{if(d<=6.4){P(x,y,d>5.3?'B':'c');if(d<5.3&&Math.sin(x*.9)+Math.cos(y*.8)>.9)P(x,y,'g')}}));
+ SPR.bush=mk(P=>each((x,y)=>{const dx=(x-7.5)/7.4,dy=(y-10)/4.8;const e=dx*dx+dy*dy;if(e<1)P(x,y,e>.7?'d':'g')}));
+ [[5,9],[9,8],[11,10],[7,11]].forEach(([x,y])=>SPR.bush.getContext('2d').fillRect(0,0,0,0));
+ {const g=SPR.bush.getContext('2d');g.fillStyle=PAL.r;[[5,9],[9,8],[11,10],[7,11]].forEach(([x,y])=>g.fillRect(x,y,1,1))}
+ SPR.mush=mk(P=>{for(let y=9;y<15;y++)for(let x=6;x<10;x++)P(x,y,'s');P(6,11,'k');P(9,11,'k');each((x,y)=>{const dx=(x-7.5)/7.4,dy=(y-9)/6;if(y<=9&&dx*dx+dy*dy<1)P(x,y,'r')});[[5,6],[9,5],[8,8],[11,8]].forEach(([x,y])=>P(x,y,'W'))});
+ SPR.ghost=mk(P=>{each((x,y)=>{const inT=Math.hypot(x-7.5,y-6.5)<5.6,inB=y>=6&&y<=13&&x>=2&&x<=13;if(inT||inB)P(x,y,'W')});[4,7,10].forEach(x=>P(x,13,'.'));P(5,6,'k');P(9,6,'k')});
+ SPR.gem=mk(P=>{for(let y=0;y<16;y++){const hw=Math.round((y<8?y:15-y)*.9);for(let x=8-hw;x<8+hw;x++)P(x,y,x<7?'W':'p')}});
+ SPR.bolt=mapS(['.......yyyy.....','......yyyy......','.....yyyy.......','....yyyyyy......','.......yyyy.....','......yyy.......','.....yyy........','....yy..........','................','................','................','................','................','................','................','................']);
+ SPR.sun=mk(P=>{each((x,y,d)=>{if(d<4.5)P(x,y,'y')});[[7,1],[8,1],[7,14],[8,14],[1,7],[1,8],[14,7],[14,8]].forEach(([x,y])=>P(x,y,'y'))});
+ SPR.book=mk(P=>{for(let y=2;y<14;y++)for(let x=2;x<14;x++)P(x,y,x<4?'k':(x>12||y==2||y==13)?'d':'w');[5,7,9].forEach(y=>{for(let x=6;x<12;x++)P(x,y+1,'g')})});
+ SPR.clock=mk(P=>each((x,y,d)=>{if(d<=6.4)P(x,y,d>5.2?'k':'w');if(x==7&&y>=3&&y<=8)P(x,y,'k');if(y==8&&x>=7&&x<=10)P(x,y,'k')}));
+ SPR.flag=mk(P=>{for(let y=1;y<15;y++)P(4,y,'b');for(let x=5;x<12;x++)for(let y=2;y<8;y++)if(y-2<(12-x)*.9)P(x,y,'r')});
+ SPR.star=mk(P=>each((x,y)=>{const a=Math.abs(x-7.5),b=Math.abs(y-7.5);if(a+b<=7&&(a<2||b<2||a+b<=4.5))P(x,y,'y')}));
+}
+initSprites();
+function ic(n,s){return`<img class="px" width="${s||32}" height="${s||32}" src="${URLS[n]||(URLS[n]=SPR[n].toDataURL())}" alt="${n}">`}
+function sq(n){return Array.from({length:5},(_,i)=>`<i class="sq ${i<n?'on':''}"></i>`).join('')}
+function drawScene(cv){
+ const W=160,H=72,g=cv.getContext('2d');cv.width=W;cv.height=H;g.imageSmoothingEnabled=false;
+ const F=(x,y,w,h,c)=>{g.fillStyle=PAL[c]||c;g.fillRect(x,y,w,h)};
+ F(0,0,W,H,'w');F(0,0,W,14,'#cfeaa8');F(0,14,W,10,'#d8efb4');
+ [[14,6],[92,3],[128,12]].forEach(([x,y])=>{F(x,y,24,5,'W');F(x+5,y-3,13,4,'W');F(x+14,y+5,8,2,'W')});
+ for(let x=0;x<W;x++){F(x,30+Math.round(7*Math.sin(x/16)+3*Math.sin(x/5)),1,H,'l')}
+ for(let x=0;x<W;x++){F(x,40+Math.round(4*Math.sin(x/9+2)),1,H,'g')}
+ [6,28,50,104,126,148].forEach((x,i)=>{const t=22+(i%3)*5;for(let k=0;k<5;k++)F(x-k-1,t+k*4,2*k+3,4,'d');F(x-1,t+20,2,6,'b')});
+ F(0,56,W,2,'l');F(0,58,W,H-58,'d');
+ let s=7;for(let i=0;i<40;i++){s=(s*1103515245+12345)&0x7fffffff;const x=s%W;s=(s*1103515245+12345)&0x7fffffff;F(x,60+s%12,3+s%4,1,'k')}
+ F(46,34,44,3,'g');F(46,37,44,4,'d');F(50,41,6,3,'d');F(80,41,5,2,'d');
+ [[50,'o'],[57,'y'],[84,'o']].forEach(([x,c])=>{F(x,31,1,3,'g');F(x-1,29,3,2,c)});
+ F(66,48,6,9,'e');F(67,47,4,1,'e');F(68,50,2,3,'#7c8a99');
+ [[18,41,'hero'],[98,41,'mush'],[126,40,'ghost'],[60,20,'coin'],[72,17,'coin'],[84,20,'coin'],[110,24,'gem']].forEach(([x,y,n])=>g.drawImage(SPR[n],x,y));
+}
+
+/* ---------- state ---------- */
+const SC_MAX={protect:30,trade:25,align:25,follow:20};
+const SC_LAB={protect:'Protect essentials',trade:'Understand trade-offs',align:'Align with goals',follow:'Follow through'};
+function fresh(){return{onb:0,goal:'invest',mode:'practice',tab:'home',pref:'balanced',range:'ALL',filter:'all',auto:{on:false,sym:'TMF',amt:20},hist:{practice:[],real:[]},sub:null,unlock:false,keys:{},sc:{protect:0,trade:0,align:0,follow:0},
+ rp:{stress:false,prio:'savings',sel:null,tried:{},locked:null},
+ first:{type:null,steps:[],reflect:'',done:false,bal:800,apr:22,pay:60},
+ linked:null,reviews:[],pending:false,rescue:null,
+ acc:{practice:{cash:300,spent:0,hold:{},orders:[],log:[],realized:0},real:{cash:100,spent:0,hold:{},orders:[],log:[],realized:0}},q:'',
+ inv:{cap:100,sel:null,amt:20,ack:[false,false,false],reason:null,placed:null,lesson:null,sellSym:null,sellReason:null,sellPct:100,sold:null},
+ mk:{m:0,d:0},
+ money:{sav:150,income:1000,ess:780,card:{bal:800,apr:22,min:35},loan:{bal:2400,apr:5,min:45},al:{cush:40,debt:40,inv:40},msub:'stash'},
+ autoCount:0,goalSort:'priority',saveTarget:500,gsub:'goals',user:{joined:false,name:'',board:'dec'},
+ lsub:'options',openL:null,
+ }}
+let S=fresh(),T=null,FT=null,GAME=null,kd=null,ku=null;
+const allX=()=>!!(S.inv.lesson&&S.inv.lesson.res==='hold');
+const TITLES=['Explorer','Planner','Risk Navigator','Habit Builder'];
+function titleOf(){if(S.reviews.length>=4)return TITLES[3];if(allX())return TITLES[2];if(S.first.done)return TITLES[1];return TITLES[0]}
+const total=()=>Object.values(S.sc).reduce((a,b)=>a+b,0);
+function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;$('#phone').appendChild(e);setTimeout(()=>e.remove(),1900)}
+function sc(k,n,key){if(key){if(S.keys[key])return;S.keys[key]=1}const b=S.sc[k];S.sc[k]=Math.min(SC_MAX[k],b+n);const g=S.sc[k]-b;if(g>0)toast('+'+g+' XP '+SC_LAB[k]);head()}
+function head(){$('#hico').innerHTML=ic('hero',36);$('#hlvl').textContent='LV'+(TITLES.indexOf(titleOf())+1)+' '+titleOf().toUpperCase()+'  '+total()+'/100';$('#hbar').style.width=total()+'%';$('#top').style.display=S.onb<3?'none':'flex'}
+const TABS=[['home','tree','PORTFOLIO'],['garden','gem','MARKET'],['play','star','GOALS'],['money','coin','BUDGET'],['learn','book','LEARN']];
+function bar(){const t=$('#tabs');t.style.display=S.onb<3?'none':'flex';t.innerHTML=TABS.map(x=>`<button class="${S.tab===x[0]?'on':''}" onclick="nav('${x[0]}',null)">${ic(x[1],28)}${x[2]}</button>`).join('')}
+function stopGame(){if(GAME){cancelAnimationFrame(GAME.raf);GAME.dead=true;GAME=null}if(kd){removeEventListener('keydown',kd);removeEventListener('keyup',ku);kd=ku=null}}
+function nav(tab,sub){stopGame();clearInterval(T);clearInterval(FT);FT=null;S.tab=tab;S.sub=sub;render();$('#screen').scrollTop=0}
+function render(){recHist();head();bar();clockBar();if(S.onb<3)return rOnb();checkBadges();checkMedals();({home:rHome,play:rPlay,garden:rTrade,money:rMoney,learn:rLearn,about:rAbout})[S.tab]()}
+function setHTML(h){$('#screen').innerHTML=h}
+function back(){return`<button class="back" onclick="nav('${S.tab}',null)">◀ BACK</button>`}
+
+/* ---------- onboarding ---------- */
+const GOALS={trip:['star','Save for a trip','savings'],debt:['coin','Get out of debt','debt'],invest:['tree','Learn to invest','invest'],impulse:['mush','Stop impulse buys','impulse']};
+function rOnb(){
+ if(S.onb===0){setHTML(`<div class="splash"><canvas id="sc0" class="px" style="width:100%;border:4px solid var(--k)"></canvas><div class="big">${APP_NAME}</div><p class="sub">Grow your money.<br>Level up your choices.</p><button class="btn" onclick="S.onb=3;S.tab='home';render()">▶ PRESS START</button><p class="note">Simulated demo. No real money moves.</p></div>`);drawScene($('#sc0'))}
+ else if(S.onb===1)setHTML(`<h2>PICK YOUR QUEST</h2><div class="sub">What do you want to work on?</div>${Object.keys(GOALS).map(k=>`<button class="opt" style="display:flex;gap:12px;align-items:center;font-size:22px" onclick="S.goal='${k}';S.onb=2;render()">${ic(GOALS[k][0],32)}${GOALS[k][1]}</button>`).join('')}`);
+ else setHTML(`<h2>CHOOSE MODE</h2><div class="sub">Same game either way. You can switch later.</div>
+  <button class="opt" onclick="S.mode='practice';S.onb=3;S.tab='home';render()"><b>🎮 PRACTICE FIRST</b><br>Play money, zero risk. Same app, same rules.</button>
+  <button class="opt" onclick="S.mode='real';S.onb=3;S.tab='home';render()"><b>🌱 REAL ACCOUNT</b><br>Adds an age confirmation on each order. In this demo it uses a simulated broker connection.</button>`);
+}
+
+/* ---------- PLAY ---------- */
+function quests(){const u=S.unlock,seeds=S.acc.practice.orders.length+S.acc.real.orders.length;return[
+ {t:'REWIND',d:'Rehearse a money choice',ico:'clock',done:!!S.rp.locked,lock:null,go:()=>nav('play','replay')},
+ {t:'FIRST MOVE',d:'Do one real step',ico:'flag',done:S.first.done,lock:(S.rp.locked||u)?null:'Finish REWIND first',go:()=>nav('play','mission')},
+ {t:'FIRST BUY',d:'Make your first investment',ico:'tree',done:seeds>0,lock:null,go:()=>nav('garden',null)},
+ {t:'FIRST MEDAL',d:'Earn a bronze medal on any goal',ico:'gem',done:goalsCalc().some(g=>g.tier>=1),lock:null,go:()=>nav('play',null)},
+ {t:'4 WEEKS',d:'Weekly check-ins',ico:'star',done:S.reviews.length>=4,lock:(S.first.done||u)?null:'Finish FIRST MOVE first',go:()=>nav('play','weekly')}]}
+function tapQ(i){const q=quests()[i];if(q.lock)toast(q.lock);else q.go()}
+/* ---------- GOALS (measurable, ranked) ---------- */
+const RANKS=[[0,'ROOKIE'],[3,'SAVER'],[7,'INVESTOR'],[11,'STRATEGIST'],[15,'MASTER']];
+const MEDALS=['NONE','BRONZE','SILVER','GOLD'],MCOL=['#94a3b8','#b45309','#94a3b8','#f4c542'];
+function goalsCalc(){
+ const M=S.money,A=acct(),T=S.saveTarget,inv=A.orders.reduce((s,o)=>s+o.amt,0),funds=Object.keys(A.hold).filter(k=>!ASSETS[k].single).length;
+ return[
+  {id:'save',ico:'coin',n:'SAVINGS GOAL',d:'Reach your target of '+fmt(T),cur:M.sav,tiers:[T*.5,T*.75,T],u:'$'},
+  {id:'debt',ico:'ghost',n:'CARD PAYDOWN',d:'Pay down your $800 credit card',cur:Math.max(0,800-M.card.bal),tiers:[200,500,800],u:'$'},
+  {id:'inv',ico:'tree',n:'AMOUNT INVESTED',d:'Total you have put to work',cur:inv,tiers:[50,200,500],u:'$'},
+  {id:'spread',ico:'globe',n:'SPREAD',d:'Different funds you own',cur:funds,tiers:[1,2,3],u:'#'},
+  {id:'auto',ico:'clock',n:'AUTOPILOT',d:'Months of auto-invest',cur:S.autoCount,tiers:[1,3,6],u:'#'},
+  {id:'habit',ico:'star',n:'WEEKLY HABIT',d:'Weekly check-ins done',cur:S.reviews.length,tiers:[1,2,4],u:'#'}
+ ].map(g=>{const t=g.tiers.filter(x=>g.cur>=x).length,prev=t>0?g.tiers[t-1]:0,next=g.tiers[Math.min(t,2)];return{...g,tier:t,next,pct:t>=3?100:Math.max(0,Math.min(100,(g.cur-prev)/(next-prev)*100))}})}
+const gv=(g,v)=>g.u==='$'?fmt(v):String(Math.round(v));
+function rankInfo(){const pts=goalsCalc().reduce((s,g)=>s+g.tier,0);let i=0;RANKS.forEach((r,j)=>{if(pts>=r[0])i=j});return{pts,i,name:RANKS[i][1],next:RANKS[i+1]}}
+function goalSorted(mode){const gs=goalsCalc();return mode==='closest'?gs.slice().sort((a,b)=>(a.tier>=3)-(b.tier>=3)||(100-a.pct)-(100-b.pct)):gs}
+function goalMini(){const g=goalSorted('closest')[0],r=rankInfo();return`<div class="card" style="cursor:pointer" onclick="nav('play',null)"><div class="lab" style="margin:0"><span class="badge y">RANK: ${r.name}</span><b class="h">▶</b></div><div class="lab"><span>${g.n}</span><b>${gv(g,g.cur)} / ${gv(g,g.next)}</b></div><div class="meter"><i style="width:${g.pct}%"></i></div></div>`}
+function checkMedals(){if(S.onb<3)return;goalsCalc().forEach(g=>{for(let i=1;i<=g.tier;i++){const k='m'+g.id+i;if(!S.keys[k]){S.keys[k]=1;toast(MEDALS[i]+' MEDAL: '+g.n)}}})}
+function rPlay(){
+ if(S.sub)return({replay:rReplay,mission:rMission,weekly:rWeekly})[S.sub]();
+ if(S.gsub==='world')return rWorld();
+ const r=rankInfo(),gs=goalSorted(S.goalSort),qs=quests(),nx=qs.findIndex(q=>!q.done&&!q.lock);
+ setHTML(gSeg()+`<div class="card"><span class="badge y">YOUR RANK</span><h2 class="h" style="font-size:16px;margin:4px 0 8px">${r.name}</h2><div class="meter"><i style="width:${r.pts/18*100}%"></i></div>
+ <p class="note">${r.pts}/18 medal points${r.next?'. '+(r.next[0]-r.pts)+' more for '+r.next[1]:'. Top rank!'}</p>
+ <div style="display:flex;justify-content:space-between;margin-top:6px">${RANKS.map((x,i)=>`<span class="badge ${i<=r.i?'g':''}" style="font-size:6px">${x[1]}</span>`).join('')}</div></div>
+ <div class="seg"><button class="${S.goalSort==='priority'?'on':''}" onclick="S.goalSort='priority';render()">BY PRIORITY</button><button class="${S.goalSort==='closest'?'on':''}" onclick="S.goalSort='closest';render()">CLOSEST FIRST</button></div>
+ ${gs.map((g,i)=>`<div class="card" style="padding:8px 10px"><div class="lab" style="margin:0"><span style="display:flex;gap:8px;align-items:center"><b class="h" style="font-size:11px">#${i+1}</b>${ic(g.ico,28)}<b class="h" style="font-size:8px">${g.n}</b></span><span class="badge" style="background:${MCOL[g.tier]};color:${g.tier===0?'#fff':'#12302a'};margin:0">${MEDALS[g.tier]}</span></div>
+  <div class="meter" style="margin-top:8px"><i style="width:${g.pct}%"></i></div><div class="lab"><span>${gv(g,g.cur)} / ${gv(g,g.next)}</span><small style="color:var(--d)">${g.tier>=3?'MAX':'next: '+MEDALS[g.tier+1]}</small></div><p class="note" style="margin:0">${g.d}</p>
+  ${g.id==='save'?`<div class="lab"><span>My target</span><b id="stv">${fmt(S.saveTarget)}</b></div><input type="range" min="200" max="1500" step="50" value="${S.saveTarget}" oninput="$('#stv').textContent='$'+this.value" onchange="S.saveTarget=+this.value;render()">`:''}</div>`).join('')}
+ <p class="note">Medals are bronze, silver and gold steps toward each goal. Ranks reflect habits and progress, never trading volume or returns. Nothing here compares you with other people.</p>
+ <div class="card"><span class="badge y">${nx<0?'ALL QUESTS CLEAR':'NEXT QUEST'}</span>${nx<0?'<h3>YOU WIN!</h3>':`<h3>${qs[nx].t}</h3><p>${qs[nx].d}</p><button class="btn" onclick="tapQ(${nx})">▶ GO</button>`}
+ <div class="pips">${qs.map((q,i)=>`<div class="pip ${q.done?'done':q.lock?'lock':i===nx?'next':''}" onclick="tapQ(${i})">${ic(q.ico,28)}<em>${q.done?'✓':q.lock?'x':i+1}</em></div>`).join('')}</div></div>
+ ${badgeCard()}`);
+}
+
+/* ---------- WORLD RANK (opt-in, username only, demo players are fictional) ---------- */
+const NA=['Pixel','Night','Moss','Clover','Ember','Lunar','Tidy','Calm','Steady','Quiet','Sunny','Brave','Mellow','Frost','Amber','Nimble'],NB=['Fox','Owl','Sprout','Comet','Badger','Willow','Otter','Pebble','Falcon','Mango','Heron','Lynx','Beetle','Maple','Robin','Koala'];
+const NPC=(()=>{const r=rnd(4242),out=[],used={};while(out.length<60){const nm=NA[Math.floor(r()*16)]+NB[Math.floor(r()*16)]+(r()<.5?'_':'')+Math.floor(r()*100);if(used[nm])continue;used[nm]=1;const b=(r()+r())/2;out.push({name:nm,dec:15+b*105+r()*10,hab:b*34+r()*6,goal:b*16+r()*2})}return out})();
+const BOARDS={dec:['DECISIONS','Wisdom Score plus 2x goal medal points'],hab:['HABITS','Check-ins, auto-invest months, first move'],goal:['GOALS','Medal points across your goals']};
+function myScores(){const p=rankInfo().pts;return{dec:total()+p*2,hab:Math.min(40,S.reviews.length*4+S.autoCount*3+(S.first.done?4:0)),goal:p}}
+function avatarFor(n){let h=0;for(const c of n)h=(h*31+c.charCodeAt(0))>>>0;return['hero','mush','ghost','tree','gem','star','bush','globe'][h%8]}
+function boardRows(b){const f=Math.min(1,(S.mk.m+8)/32),me=myScores()[b],rows=NPC.map(p=>({name:p.name,s:Math.round(p[b]*f),me:false}));rows.push({name:S.user.name,s:me,me:true});rows.sort((a,c)=>c.s-a.s||(a.name<c.name?-1:1));return rows}
+function gSeg(){return`<div class="seg"><button class="${S.gsub==='goals'?'on':''}" onclick="S.gsub='goals';render()">MY GOALS</button><button class="${S.gsub==='world'?'on':''}" onclick="S.gsub='world';render()">WORLD RANK</button></div>`}
+function unCheck(v){const fmtOk=/^[A-Za-z0-9_]{3,16}$/.test(v),num=/\d{7,}/.test(v),taken=NPC.some(p=>p.name.toLowerCase()===v.toLowerCase()),ok=fmtOk&&!num&&!taken,m=$('#unmsg'),b=$('#unbtn');
+ if(b)b.disabled=!ok;if(m)m.textContent=ok?'Looks good.':num?'No phone numbers or long digit strings.':taken?'Taken. Try another.':'3-16 letters, numbers or _ . No spaces.'}
+function joinWorld(){const v=$('#un').value;if(!/^[A-Za-z0-9_]{3,16}$/.test(v)||/\d{7,}/.test(v))return;S.user.name=v;S.user.joined=true;toast('Joined as '+v);render()}
+function leaveWorld(){S.user.joined=false;S.user.name='';render()}
+function howCard(){return`<div class="card"><span class="badge">HOW RANK WORKS</span><p>Scores use decision quality and habits only: readiness, understanding risk, following your plan, medals. They never use balances, returns or trade counts, so you cannot climb by gambling or trading more. Leagues keep comparisons fair, and seasons reset so newcomers can catch up.</p></div><div class="fb">Demo players are fictional. A real version needs a server, username moderation, reporting tools and anti-cheat.</div>`}
+function rWorld(){
+ const U=S.user;
+ if(!U.joined)return setHTML(gSeg()+`<div class="card"><span class="badge y">WORLD RANK</span><h3>COMPETE ON DECISIONS</h3><p>See how your habits and choices compare worldwide. Joining is optional.</p><p class="note">Others see: your username, score and league. Never shown: balances, returns, trades, or your real name.</p>
+  <input id="un" type="text" maxlength="16" placeholder="pick a username" oninput="unCheck(this.value)"><p class="note" id="unmsg">3-16 letters, numbers or _ . Do not use your real name, school or contact info.</p><button class="btn" id="unbtn" disabled onclick="joinWorld()">JOIN</button></div>`+howCard());
+ const b=U.board,rows=boardRows(b),i=rows.findIndex(r=>r.me),n=rows.length,pct=(i+1)/n,lg=pct<=.1?'DIAMOND':pct<=.3?'GOLD':pct<=.6?'SILVER':'BRONZE';
+ const row=(r,k)=>`<div class="ar" style="cursor:default;${r.me?'background:var(--y);':''}"><b class="h" style="font-size:9px;width:34px">#${k+1}</b>${ic(avatarFor(r.name),28)}<div style="flex:1"><b>${r.name}${r.me?' (YOU)':''}</b></div><b class="h" style="font-size:10px">${r.s}</b></div>`;
+ let list=rows.slice(0,10).map((r,k)=>row(r,k)).join('');
+ if(i>=10){const s=Math.max(10,i-1);list+=`<div style="text-align:center">…</div>`+rows.slice(s,i+2).map((r,j)=>row(r,s+j)).join('')}
+ setHTML(gSeg()+`<div class="card"><span class="badge y">${lg} LEAGUE</span><h2 class="h" style="font-size:14px;margin:4px 0">${U.name}</h2><div class="grid g2"><div class="stat"><b>#${i+1}</b><span>of ${n} players</span></div><div class="stat"><b>TOP ${Math.max(1,Math.ceil(pct*100))}%</b><span>${BOARDS[b][0]}</span></div></div></div>
+ <div class="seg">${Object.keys(BOARDS).map(k=>`<button class="${b===k?'on':''}" onclick="S.user.board='${k}';render()">${BOARDS[k][0]}</button>`).join('')}</div>
+ <p class="note" style="margin:0 0 6px">${BOARDS[b][1]}. Moves as simulated months pass.</p><div class="card" style="padding:4px 10px">${list}</div>`+howCard()+`<button class="btn w" onclick="leaveWorld()">LEAVE RANKING</button>`);
+}
+
+/* ---------- REWIND (decision replay) ---------- */
+const OPT={
+ a:{n:'Go on the $120 trip',flex:80,sav:150,soc:3,coach:{social:'Matches what matters most to you. Add a small weekly saving so the goal does not stall.',savings:'Fun trip, but you drift from your goal and keep only $80 of wiggle room.'}},
+ b:{n:'Find a $60 alternative',flex:140,sav:150,soc:2,coach:{social:'Still with your friends at half the cost, with more room for surprises.',savings:'Middle path: you keep the experience and $60 of room, but savings stay flat.'}},
+ c:{n:'Skip it, save the $120',flex:200,sav:270,soc:1,coach:{social:'Great for your goal, but you give up something that matters to you. A fair trade, not a free one.',savings:'Fastest route to $500 and the best cushion for surprises.'}}};
+function rReplay(){
+ const r=S.rp,sel=r.sel&&OPT[r.sel];let out='';
+ if(sel){const fl=sel.flex-(r.stress?90:0);
+  out=`<div class="card"><span class="badge">RESULT</span><h3>${sel.n}</h3><div class="grid"><div class="stat"><b style="color:${fl<0?'#e11d48':'inherit'}">${fmt(fl)}</b><span>Spare cash</span></div><div class="stat"><b>${fmt(sel.sav)}</b><span>Saved</span></div><div class="stat"><b>${Math.round(sel.sav/5)}%</b><span>Of $500</span></div></div>
+  ${r.stress?`<div class="fb ${fl<0?'bad':'warn'}">A $90 phone repair hits. ${fl<0?'You are '+fmt(-fl)+' short.':'You can cover it with '+fmt(fl)+' left.'}</div>`:''}
+  <div class="fb">${sel.coach[r.prio]}</div><button class="btn" onclick="lockChoice()">LOCK THIS CHOICE</button></div>`}
+ setHTML(`${back()}<h2>REWIND</h2><div class="sub">A friend invites Alex on a $120 trip. Alex has $200 spare and $150 saved. Try every option. Nothing is real.</div>
+ <div class="card"><div class="lab"><span>Most important now?</span></div><div class="seg"><button class="${r.prio==='social'?'on':''}" onclick="S.rp.prio='social';render()">SOCIAL</button><button class="${r.prio==='savings'?'on':''}" onclick="S.rp.prio='savings';render()">SAVINGS</button></div>
+ <label class="ck"><input type="checkbox" ${r.stress?'checked':''} onchange="S.rp.stress=this.checked;if(this.checked)sc('trade',5,'stress');render()"><span>Surprise $90 expense</span></label>
+ ${Object.keys(OPT).map(k=>`<button class="opt ${r.sel===k?'on':''}" onclick="tryOpt('${k}')">${r.tried[k]?'↺ ':''}${OPT[k].n}</button>`).join('')}</div>${out}
+ ${r.locked?`<div class="card"><span class="badge g">LOCKED</span><p>You chose: ${OPT[r.locked].n}.</p><button class="btn" onclick="nav('play','mission')">▶ TO FIRST MOVE</button></div>`:''}`);
+}
+function tryOpt(k){S.rp.sel=k;S.rp.tried[k]=1;const n=Object.keys(S.rp.tried).length;if(n>=2)sc('trade',10,'t2');if(n>=3)sc('trade',5,'t3');render()}
+function lockChoice(){const r=S.rp,k=r.sel;r.locked=k;if(OPT[k].flex-90>=0)sc('protect',15,'rpP');if(r.prio==='social'?(k==='a'||k==='b'):(k==='b'||k==='c'))sc('align',12,'rpA');render()}
+
+/* ---------- FIRST MOVE (action lock) ---------- */
+const MISSIONS={
+ savings:{n:'First $5 Saved',i:'coin',steps:['Choose where savings live (account, envelope, app)','Name the goal and amount','Move any amount, even $1']},
+ invest:{n:'First Investment Plan',i:'tree',steps:['Check you have a small cushion and no costly debt','Pick your time horizon and comfort with ups and downs','Write a plan, or practice in TRADE']},
+ debt:{n:'First Debt Action',i:'coin',steps:['Enter your balance and rate below','Pick a payment you can keep up','Set a reminder or make a payment']},
+ impulse:{n:'First Impulse Reset',i:'mush',steps:['Pick a nonessential item you want','Compare it with your goal','Choose: buy, wait 24 hours, or cheaper option']},
+ nomoney:{n:'No-cash First Move',i:'clock',steps:['List subscriptions and pick one to cancel','Build a bill calendar with due dates']}};
+function rMission(){
+ const f=S.first;let h=back()+`<h2>FIRST MOVE</h2><div class="sub">Do one real step to unlock the next level. No money? Use the last option.</div>`;
+ if(!f.type){const rec=GOALS[S.goal][2];h+=Object.keys(MISSIONS).map(k=>`<button class="opt ${k===rec?'on':''}" style="display:flex;gap:10px;align-items:center" onclick="pickMission('${k}')">${ic(MISSIONS[k].i,28)}<span>${MISSIONS[k].n}${k===rec?' (best fit)':''}</span></button>`).join('')}
+ else if(!f.done)h+=missionCard();
+ else if(!S.linked)h+=`<div class="card"><span class="badge">TRACK IT</span><h3>HOW TO TRACK?</h3><button class="opt" onclick="S.linked='readonly';toast('Linked (simulated)');render()"><b>LINK READ-ONLY</b> (simulated)<br>Can see balances. Cannot move money.</button><button class="opt" onclick="S.linked='manual';render()"><b>LOG BY HAND</b><br>Works with no account.</button></div>`;
+ else h+=`<div class="card"><span class="badge g">DONE</span><h3>FIRST MOVE COMPLETE</h3><button class="btn" onclick="nav('play',null)">▶ BACK TO QUESTS</button></div>`;
+ setHTML(h);
+}
+function pickMission(k){S.first.type=k;S.first.steps=MISSIONS[k].steps.map(()=>false);render()}
+function lockOK(){const f=S.first;return f.steps.every(Boolean)&&(f.type!=='impulse'||f.reflect.trim().length>=5)}
+function updLock(){const b=$('#lockbtn');if(b)b.disabled=!lockOK()}
+function missionCard(){
+ const f=S.first,m=MISSIONS[f.type];let x='';
+ if(f.type==='debt'){const r=f.apr/1200,B=f.bal,P=f.pay;let l;if(P<=r*B)l='That payment does not cover monthly interest. The balance grows.';else{const n=-Math.log(1-r*B/P)/Math.log(1+r);l=`Paid off in about <b>${Math.ceil(n)} months</b>. Interest: <b>${fmt(P*n-B)}</b>.`}
+  x=`<div class="lab"><span>Balance</span><b>${fmt(B)}</b></div><input type="range" min="200" max="3000" step="50" value="${B}" oninput="S.first.bal=+this.value;render()"><div class="lab"><span>APR</span><b>${f.apr}%</b></div><input type="range" min="5" max="30" value="${f.apr}" oninput="S.first.apr=+this.value;render()"><div class="lab"><span>Monthly payment</span><b>${fmt(P)}</b></div><input type="range" min="20" max="300" step="5" value="${P}" oninput="S.first.pay=+this.value;render()"><div class="fb">${l}</div>`}
+ if(f.type==='impulse')x=`<input type="text" placeholder="One line: what did I decide and why?" value="${f.reflect.replace(/"/g,'&quot;')}" oninput="S.first.reflect=this.value;updLock()">`;
+ return`<div class="card"><span class="badge y">🔒 ACTION LOCK</span><h3>${m.n}</h3>${x}${m.steps.map((s,i)=>`<label class="ck"><input type="checkbox" ${f.steps[i]?'checked':''} onchange="S.first.steps[${i}]=this.checked;updLock()"><span>${s}</span></label>`).join('')}
+ <button class="btn" id="lockbtn" ${lockOK()?'':'disabled'} onclick="finishMission()">COMPLETE</button><p class="note">Locked until every step is done${f.type==='impulse'?' and a note is written':''}.</p><button class="btn w" onclick="S.first.type=null;render()">CHANGE MOVE</button></div>`}
+function finishMission(){if(!lockOK())return;S.first.done=true;sc('follow',8,'fm');sc('protect',5,'fmp');if(S.first.type===GOALS[S.goal][2])sc('align',13,'fma');render()}
+
+/* ---------- 4 WEEKS ---------- */
+function rWeekly(){
+ const n=S.reviews.length;let h=back()+`<h2>4 WEEKS</h2><div class="sub">Follow your plan. Adjust when life gets in the way.</div><div class="card"><div class="lab"><span>Habit</span><b>${n}/4</b></div><div class="meter"><i style="width:${n/4*100}%"></i></div></div>`;
+ if(n>=4)h+=`<div class="card"><span class="badge y">🏆 MILESTONE</span><h3>HABIT BUILDER</h3><p>Four weeks of follow-through. Example sponsor reward: a campus dining voucher. Nothing depended on money earned or spent.</p></div>`;
+ else if(!S.pending)h+=`<div class="card"><h3>WEEK ${n+1}</h3><p>Your check-in is due.</p><button class="btn d" onclick="S.pending=true;render()">⏩ FAST-FORWARD A WEEK (demo)</button></div>`;
+ else if(S.rescue){const R={money:['Not enough money','Lower the target or postpone a week. A small step beats a skipped one.'],forgot:['I forgot','Set a payday reminder and attach it to a habit you already have.'],tempted:['I got tempted','Replay that choice with your goal in mind.'],start:["Didn't know how to start",'Open a step-by-step guide for your action.']};
+  h+=S.rescue==='pick'?`<div class="card"><span class="badge y">ACTION RESCUE</span><h3>WHAT GOT IN THE WAY?</h3><p>No streak reset. No penalty.</p>${Object.keys(R).map(k=>`<button class="opt" onclick="S.rescue='${k}';render()">${R[k][0]}</button>`).join('')}</div>`:`<div class="card"><span class="badge y">ACTION RESCUE</span><h3>${R[S.rescue][0].toUpperCase()}</h3><div class="fb">${R[S.rescue][1]}</div><button class="btn" onclick="revise()">APPLY THE FIX</button></div>`}
+ else h+=`<div class="card"><span class="badge">CHECK-IN</span><h3>DID YOU FOLLOW YOUR PLAN?</h3><button class="btn g" onclick="review()">YES</button><button class="btn w" onclick="S.rescue='pick';render()">NOT QUITE</button></div>`;
+ setHTML(h)}
+function review(){S.reviews.push('done');S.pending=false;sc('follow',3);render()}
+function revise(){S.reviews.push('revised');S.pending=false;S.rescue=null;sc('follow',3);render()}
+
+/* ---------- GARDEN (simulated market) ---------- */
+const ASSETS={
+ TRZ:{n:'T-BILL TRUST',f:'Short-term Treasury Fund',spr:'coin',goal:'steady',risk:1,fee:'0.05% / yr',div:'Short-term government bills',dr:.0035,vol:.006,shock:-.003,blurb:'Very small swings. Slow and steady.'},
+ DVD:{n:'STEADY PAYER',f:'Dividend Steady Fund',spr:'sun',goal:'steady',risk:2,fee:'0.12% / yr',div:'Dozens of established companies',dr:.0045,vol:.02,shock:-.04,blurb:'Established companies that share profits.'},
+ TCH:{n:'TECH LEADERS',f:'Tech Leaders Fund',spr:'gem',goal:'growth',risk:4,fee:'0.20% / yr',div:'Technology companies only',dr:.008,vol:.06,shock:-.15,blurb:'Higher growth potential, bigger swings.'},
+ SPC:{n:'ROCKET CO.',f:'Rocket Co. (single stock)',spr:'star',goal:'growth',single:true,risk:5,fee:'Spread costs apply',div:'None: one company',dr:.006,vol:.12,shock:-.28,blurb:'One company. Big swings both ways.'},
+ TMF:{n:'INDEX TREE',f:'Total Market Fund',spr:'tree',goal:'balanced',risk:3,fee:'0.04% / yr',div:'Hundreds of companies',dr:.006,vol:.04,shock:-.09,blurb:'Broad stock-market exposure.'},
+ GLX:{n:'GLOBE VINE',f:'Global Index Fund',spr:'globe',goal:'balanced',risk:3,fee:'0.07% / yr',div:'Thousands of companies, many countries',dr:.005,vol:.045,shock:-.10,blurb:'Spreads across countries.'},
+ BDX:{n:'BOND BUSH',f:'Bond Basics Fund',spr:'bush',goal:'steady',risk:2,fee:'0.05% / yr',div:'Many government and company bonds',dr:.003,vol:.012,shock:-.01,blurb:'Smoother, slower growth.'},
+ HOT:{n:'HOT MUSHROOM',f:'Hot Tip Co. (single stock)',spr:'mush',goal:'growth',single:true,risk:5,fee:'Spread costs apply',div:'None: one company',dr:.003,vol:.15,shock:-.35,blurb:'One company. Wild swings.'}};
+Object.assign(ASSETS.TRZ,{sector:'Bonds'});Object.assign(ASSETS.DVD,{sector:'Dividend fund'});Object.assign(ASSETS.TCH,{sector:'Technology fund'});Object.assign(ASSETS.SPC,{sector:'Aerospace'});Object.assign(ASSETS.TMF,{sector:'Index fund'});Object.assign(ASSETS.GLX,{sector:'Index fund'});Object.assign(ASSETS.BDX,{sector:'Bonds'});Object.assign(ASSETS.HOT,{sector:'Speculative'});
+[['AQUA','AQUAPURE','AquaPure Utilities Inc.','Utilities','globe','steady',2,.004,.03,-.05],['FRSH','FRESHCART','FreshCart Grocers Inc.','Consumer','bush','balanced',3,.005,.05,-.10],['MEDI','MEDICORE','MediCore Health Corp.','Healthcare','heart','balanced',3,.005,.05,-.08],['BANK','MAPLE BANK','Maple Savings Bank','Financials','coin','balanced',3,.0045,.05,-.09],['HOME','COZYNEST','CozyNest Homes REIT','Real estate','tree','balanced',3,.004,.045,-.08],['MOVE','SWIFTMOVE','SwiftMove Logistics','Industrials','flag','balanced',3,.005,.055,-.10],['SNAC','CRUNCHPOP','CrunchPop Snacks Co.','Consumer','mush','balanced',3,.0045,.05,-.07],['BOLT','VOLTWAVE','VoltWave Energy Co.','Energy','bolt','growth',4,.006,.08,-.18],['SOLR','SUNGRID','SunGrid Solar Inc.','Energy','sun','growth',4,.007,.09,-.17],['BYTE','BYTEFORGE','ByteForge Software Inc.','Technology','gem','growth',4,.008,.09,-.20],['GAME','PIXELPLAY','PixelPlay Games Ltd.','Entertainment','ghost','growth',5,.007,.11,-.25],['CHIP','NANOCHIP','NanoChip Labs Inc.','Technology','star','growth',5,.009,.12,-.26]].forEach(([t,n,f,sec,spr,goal,risk,dr,vol,shock])=>{ASSETS[t]={n,f,sector:sec,spr,goal,single:true,risk,fee:'Spread costs apply',div:'None: one company',dr,vol,shock,blurb:sec+' company (fictional). Single stocks swing more than funds.'}});
+function rnd(seed){let s=seed>>>0;return()=>{s=(Math.imul(s,1664525)+1013904223)>>>0;return s/4294967296}}
+const PR={};
+Object.keys(ASSETS).forEach(k=>{const a=ASSETS[k],r=rnd([...k].reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0,7));let p=100;const arr=[p];for(let i=1;i<=30;i++){const z=(r()+r()+r()+r()-2)*1.73;let ret=a.dr+a.vol*z;if(i===10)ret=a.shock;if(ret<-.6)ret=-.6;p*=1+ret;arr.push(p)}PR[k]=arr});
+function pxAt(k,m,d){const i=6+m,a=PR[k][i],b=PR[k][Math.min(30,i+1)];if(d<=0)return a;if(d>=30)return b;const f=d/30,base=a+(b-a)*f,h=Math.sin((k.charCodeAt(0)*131+k.charCodeAt(2)*17+m*53+d*29)*12.9898)*43758.5453,nz=(h-Math.floor(h))*2-1;return base*(1+nz*ASSETS[k].vol*.25*Math.sin(Math.PI*f))}
+const px=k=>pxAt(k,S.mk.m,S.mk.d);
+const dayChg=k=>{let m=S.mk.m,d=S.mk.d-1;if(d<0){m--;d=29}if(m<0)return 0;return (px(k)/pxAt(k,m,d)-1)*100};
+const acct=()=>S.acc[S.mode];
+function pvOf(a){let v=0,c=0;for(const k in a.hold){v+=a.hold[k].units*px(k);c+=a.hold[k].cost}return{v,c}}
+function spark(k,w,h){const a=PR[k].slice(0,6+S.mk.m+1).concat(S.mk.d>0?[px(k)]:[]),mn=Math.min(...a),mx=Math.max(...a),rg=mx-mn||1;
+ const pts=a.map((v,i)=>`${(i/(a.length-1||1)*w).toFixed(1)},${(h-3-(v-mn)/rg*(h-6)).toFixed(1)}`).join(' ');
+ return`<svg style="width:100%;height:${h}px;background:#fff;border:3px solid #12302a" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" shape-rendering="crispEdges"><polyline fill="none" stroke="#2b5e4a" stroke-width="3" vector-effect="non-scaling-stroke" points="${pts}"/></svg>`}
+function setMode(m){S.mode=m;nav(S.tab==='garden'&&!S.sub?'garden':'home',null)}
+/* ---------- simulated clock: 30-day months, 24 months ---------- */
+let CLK=null;
+function stopClock(){clearInterval(CLK);CLK=null}
+function toggleClock(){if(CLK){stopClock();clockBar();return}CLK=setInterval(()=>tickDays(1,true),400);clockBar()}
+function dateStr(){const d=new Date(2026,10,9);d.setDate(d.getDate()+dayIdx());return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
+function clockBar(){const c=$('#clock');if(!c)return;c.style.display=S.onb<3?'none':'flex';c.innerHTML=`<span>${dateStr()} · M${S.mk.m}/24</span><button class="${CLK?'on':''}" onclick="toggleClock()">${CLK?'PAUSE':'PLAY'}</button><button onclick="tickDays(1)">+1D</button><button onclick="tickDays(7)">+1W</button><button onclick="tickDays(30)">+1M</button>`}
+function tickDays(n,quiet){
+ for(let i=0;i<n;i++){
+  if(S.mk.m>=24){stopClock();toast('Simulation complete: 24 months');break}
+  S.mk.d++;if(S.mk.d>=30)monthRoll();recHist();
+ }
+ const ae=document.activeElement;if(quiet&&ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA')){clockBar();return}
+ render();
+}
+function advance(){tickDays(30)}
+function monthRoll(){
+ const A0=acct();let v0=0,v1=0;for(const k in A0.hold){v0+=A0.hold[k].units*pxAt(k,S.mk.m,0);v1+=A0.hold[k].units*pxAt(k,S.mk.m,30)}
+ S.mk.m++;S.mk.d=0;
+ ['practice','real'].forEach(k=>{S.acc[k].spent=0;S.acc[k].cash+=S.money.al.inv});
+ const M=S.money;M.sav+=M.al.cush;M.card.bal=Math.max(0,M.card.bal*(1+M.card.apr/1200)-M.card.min-M.al.debt);M.loan.bal=Math.max(0,M.loan.bal*(1+M.loan.apr/1200)-M.loan.min);
+ const AA=acct();
+ if(S.auto.on){const amt=Math.floor(Math.min(S.auto.amt,AA.cash,S.inv.cap-AA.spent));if(amt>=5){buyInto(AA,S.auto.sym,amt);S.autoCount++;sc('follow',1,'auto'+S.mk.m);toast('Auto-invest '+fmt(amt))}}
+ if(S.mk.m===4){stopClock();if(v0>0)S.inv.lesson={pct:(v1/v0-1)*100,res:null};else toast('Market dip this month!')}
+}
+function lesson(r){S.inv.lesson.res=r;if(r==='hold'){sc('protect',5,'les');sc('align',5,'lesA')}render()}
+/* ---------- brokerage: HOME (portfolio) and TRADE (market) ---------- */
+function modeSeg(){const real=S.mode==='real';return`<div class="seg"><button class="${!real?'on':''}" onclick="setMode('practice')">PRACTICE</button><button class="${real?'on':''}" onclick="setMode('real')">REAL (SIM)</button></div>`}
+const dayIdx=()=>S.mk.m*30+S.mk.d;
+function recHist(){['practice','real'].forEach(k=>{S.hist[k][dayIdx()]=pvOf(S.acc[k]).v})}
+function histSeries(){const h=S.hist[S.mode],out=[];let last=0;for(let i=0;i<=dayIdx();i++){if(h[i]!==undefined)last=h[i];out.push(last)}return out}
+function chartHTML(a){const mx=Math.max(...a,1),mn=Math.min(...a);if(a.length<2||mx<=1)return`<div class="fb" style="margin:6px 0">Your chart appears after your first buy and one month of time.</div>`;
+ const w=300,h=80,rg=(mx-mn)||1,pts=a.map((v,i)=>`${(i/(a.length-1)*w).toFixed(1)},${(h-4-(v-mn)/rg*(h-8)).toFixed(1)}`).join(' ');
+ return`<svg style="width:100%;height:${h}px;background:#fff;border:3px solid #12302a;margin-top:6px" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" shape-rendering="crispEdges"><polyline fill="none" stroke="#2b5e4a" stroke-width="3" vector-effect="non-scaling-stroke" points="${pts}"/></svg>`}
+function health(){const A=acct(),{v}=pvOf(A),ks=Object.keys(A.hold),hot=singleVal(A),nonHot=ks.filter(k=>!ASSETS[k].single).length;
+ let sp=v>0?(nonHot>=2?100:ks.length>=1?50:0):0;if(v>0&&hot/v>.2)sp=Math.max(0,sp-30);
+ return[['SPREAD',sp,'Many funds, not one stock'],['CUSHION',Math.min(100,S.money.sav/5),'Savings toward $500'],['PLAN',S.auto.on?100:A.orders.length?40:0,'Steady auto-invest']]}
+function badgeList(){const n=S.acc.practice.orders.length+S.acc.real.orders.length;return[['coin','FIRST BUY',n>0,'Make your first buy'],['globe','SPREAD',health()[0][1]>=100,'Own 2+ funds, little single-stock'],['bolt','STORM PROOF',!!(S.inv.lesson&&S.inv.lesson.res==='hold'),'Hold through the month-4 dip'],['clock','AUTOPILOT',S.auto.on,'Turn on auto-invest'],['heart','CUSHION',S.money.sav>=500,'Save a $500 cushion'],['ghost','DEBT SLAYER',S.money.card.bal<=0,'Pay off the credit card'],['star','GOAL SET',!!S.keys.pref,'Pick your goal in MARKET']]}
+function checkBadges(){if(S.onb<3)return;badgeList().forEach(b=>{if(b[2]&&!S.keys['b'+b[1]]){S.keys['b'+b[1]]=1;toast('BADGE: '+b[1])}})}
+function badgeCard(){const bl=badgeList(),lk=bl.filter(b=>!b[2]);return`<div class="card"><h3>BADGES ${bl.length-lk.length}/${bl.length}</h3><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">${bl.map(b=>`<div style="text-align:center;font:400 6px 'Press Start 2P',monospace;line-height:1.6"><div style="opacity:${b[2]?1:.25};filter:${b[2]?'none':'grayscale(1)'}">${ic(b[0],36)}</div>${b[1]}</div>`).join('')}</div>${lk.length?`<p class="note">Next: ${lk.slice(0,3).map(b=>b[3]).join(' · ')}</p>`:''}<p class="note">Earned for habits and good decisions, never for trading more.</p></div>
+ <div class="card"><h3>PORTFOLIO HEALTH</h3>${health().map(x=>`<div class="lab"><span>${x[0]}</span><b>${Math.round(x[1])}%</b></div><div class="meter" style="height:12px"><i style="width:${x[1]}%"></i></div><p class="note" style="margin:2px 0 4px">${x[2]}</p>`).join('')}</div>`}
+const PREFS={steady:{n:'STEADY',d:'Small, smooth gains. Think roughly 3-5% a year.'},balanced:{n:'BALANCED',d:'Middle road. Think roughly 6-8% a year, with dips.'},growth:{n:'GROWTH',d:'Bigger swings for higher potential. You can lose a lot.'}};
+let SUG=[];
+const simYr=k=>(Math.pow(1+ASSETS[k].dr,12)-1)*100;
+function setPref(k){S.pref=k;const f=pickList().filter(x=>!ASSETS[x].single);S.auto.sym=f.length?f[0]:'TMF';sc('align',3,'pref');render()}
+function pickList(){return Object.keys(ASSETS).filter(k=>ASSETS[k].goal===S.pref).sort((a,b)=>(ASSETS[a].single?1:0)-(ASSETS[b].single?1:0)||ASSETS[a].risk-ASSETS[b].risk).slice(0,3)}
+function singleVal(A){let s=0;for(const k in A.hold)if(ASSETS[k].single)s+=A.hold[k].units*px(k);return s}
+function assetRow(k){const a=ASSETS[k],p=px(k),ch=dayChg(k);return`<div class="ar" onclick="openAsset('${k}')">${ic(a.spr,32)}<div style="flex:1"><b>${k} · ${a.n}</b><small>${sq(a.risk)} ${a.sector||''} ~${simYr(k).toFixed(0)}%/yr sim</small></div><div style="width:60px">${spark(k,60,26)}</div><div style="text-align:right;min-width:66px"><span style="font-size:22px">${fmt2(p)}</span><br><small style="color:${ch<0?'#e11d48':'#2b5e4a'}">${ch>=0?'+':''}${ch.toFixed(1)}%</small></div></div>`}
+function suggestions(){
+ const A=acct(),M=S.money,{v}=pvOf(A),ks=Object.keys(A.hold),pk=pickList(),out=[],toMoney=()=>{M.msub='arr';nav('money',null)};
+ if(M.card.bal>0&&M.al.debt===0&&M.card.apr>10)out.push({ico:'ghost',t:'Your card costs '+M.card.apr+'% a year',d:'Paying it down often beats investing.',go:toMoney});
+ if(M.sav<500)out.push({ico:'coin',t:'Build a $500 cushion',d:'Keeps a surprise bill from forcing a sale.',go:toMoney});
+ if(!ks.length&&A.cash>=5)out.push({ico:ASSETS[pk[0]].spr,t:'Make your first buy',d:ASSETS[pk[0]].n+' fits your '+PREFS[S.pref].n+' goal.',go:()=>openAsset(pk[0])});
+ const sv=singleVal(A);if(v>0&&sv/v>.2)out.push({ico:'mush',t:'Too much in one company',d:Math.round(sv/v*100)+'% is single stocks. Trim to 10%.',go:rebalance});
+ if(ks.length===1&&!ASSETS[ks[0]].single){const o=Object.keys(ASSETS).find(k=>!ASSETS[k].single&&!A.hold[k]&&ASSETS[k].goal!=='growth');if(o)out.push({ico:'globe',t:'Add a second fund',d:'Spreading across funds smooths the ride.',go:()=>openAsset(o)})}
+ if(ks.length&&!S.auto.on)out.push({ico:'clock',t:'Turn on auto-invest',d:'A small monthly buy builds the habit.',go:toggleAuto});
+ const qs=quests(),nx=qs.findIndex(q=>!q.done&&!q.lock);if(nx>=0)out.push({ico:qs[nx].ico,t:'Quest: '+qs[nx].t,d:qs[nx].d,go:()=>tapQ(nx)});
+ return out}
+function sugGo(i){SUG[i].go()}
+function autoSyms(){const f=pickList().filter(k=>!ASSETS[k].single);return f.length?f:['TMF']}
+const sgn=v=>(v>=0?'+':'-')+'$'+Math.abs(v).toFixed(2);
+function activityCard(A){const rows=A.log.slice(-6).reverse();return`<div class="card"><h3>ACTIVITY</h3>${rows.length?rows.map(x=>{const dt=new Date(2026,10,9);dt.setDate(dt.getDate()+x.t);const ds=dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+ return`<div class="ar" style="cursor:default"><div style="flex:1"><b>${x.type==='buy'?'BOUGHT':'SOLD'} ${x.k}</b><small>${ds} · ${fmt2(x.amt)} · fee ${fmt2(x.fee)}</small></div>${x.type==='sell'?`<b class="h" style="font-size:9px;color:${x.pl<0?'#e11d48':'#2b5e4a'}">${x.pl<0?'LOST':'GAINED'} ${sgn(x.pl)} (${(x.pl/x.cost*100).toFixed(1)}%)</b>`:`<small>${sgn(-x.fee)} start</small>`}</div>`}).join(''):'<p>No trades yet.</p>'}</div>`}
+function goSearch(){S.q='';nav('garden',null);setTimeout(()=>{const q=$('#q');if(q)q.focus()},30)}
+function toggleAuto(){S.auto.on=!S.auto.on;if(S.auto.on)sc('align',3,'autoOn');render()}
+const feeRate=k=>ASSETS[k].single?.005:.001;
+function buyInto(A,k,amt){const f=amt*feeRate(k),u=(amt-f)/px(k),h=A.hold[k]||(A.hold[k]={units:0,cost:0});h.units+=u;h.cost+=amt;A.cash-=amt;A.spent+=amt;A.orders.push({m:S.mk.m,k,amt});A.log.push({t:dayIdx(),type:'buy',k,amt,fee:f,price:px(k),units:u});return f}
+function sellFrom(A,k,pct){const hd=A.hold[k],u=hd.units*pct,c=hd.cost*pct,gross=u*px(k),f=gross*feeRate(k),net=gross-f,pl=net-c;A.cash+=net;A.realized+=pl;A.log.push({t:dayIdx(),type:'sell',k,amt:net,fee:f,price:px(k),units:u,cost:c,pl});hd.units-=u;hd.cost-=c;if(pct>=.999)delete A.hold[k];return{k,net,cost:c,pl,fee:f}}
+function rHome(){
+ const A=acct(),real=S.mode==='real',{v:val,c:cost}=pvOf(A);
+ const ks=Object.keys(A.hold),pl=val-cost,pct=cost>0?pl/cost*100:0,L=S.inv.lesson,ser=histSeries(),n=S.range==='1M'?31:S.range==='3M'?91:ser.length;
+ SUG=suggestions();
+ let h=modeSeg()+`<div class="sub" style="margin:2px 0 0">${real?'Real account (simulated connection)':'Practice account'} · Month ${S.mk.m}/24</div><h2 class="h" style="font-size:24px;margin:6px 0 4px">${fmt(val+A.cash)}</h2>
+ <div style="font-size:22px;color:${pl<0?'#e11d48':'#2b5e4a'}">${cost>0?(pl>=0?'▲ ':'▼ ')+fmt(Math.abs(pl))+' ('+(pct>=0?'+':'')+pct.toFixed(1)+'%) all time':'Make your first buy to start your chart'}</div>
+ ${chartHTML(ser.slice(-n))}<div class="seg">${['1M','3M','ALL'].map(r=>`<button class="${S.range===r?'on':''}" onclick="S.range='${r}';render()">${r}</button>`).join('')}</div>
+ <div class="card" style="padding:8px 10px"><div class="lab" style="margin:0"><span>Buying power</span><b>${fmt(A.cash)}</b></div><p class="note" style="margin:2px 0 0">${real?'From linked bank (simulated). ':''}Cap left this month: ${fmt(Math.max(0,S.inv.cap-A.spent))}</p></div>
+ <div class="card" style="padding:8px 10px"><div class="grid"><div class="stat"><b style="color:${pl<0?'#e11d48':'#2b5e4a'}">${sgn(pl)}</b><span>Unrealized (open)</span></div><div class="stat"><b style="color:${A.realized<0?'#e11d48':'#2b5e4a'}">${sgn(A.realized)}</b><span>Realized (sold)</span></div><div class="stat"><b>${fmt2(A.log.reduce((s,x)=>s+x.fee,0))}</b><span>Fees paid</span></div></div></div>
+`;
+ if(L&&!L.res)h+=`<div class="card" style="border-color:var(--r)"><span class="badge r">⚡ MARKET DIP</span><h3>PORTFOLIO ${L.pct>=0?'+':''}${L.pct.toFixed(1)}% THIS MONTH</h3><p>A simulated dip. What do you do?</p><button class="opt" onclick="lesson('hold')">Hold. My plan is long-term.</button><button class="opt" onclick="lesson('sell')">Sell everything to stop the pain.</button><button class="opt" onclick="lesson('more')">Buy extra to win it back.</button></div>`;
+ else if(L){const m={hold:['good','Sticking to the plan is the skill being tested. Dips are part of investing.'],sell:['warn','Selling after a drop locks in the loss. If you need the money, that is a fair reason. Fear alone is not.'],more:['bad','Buying extra to "win it back" is loss chasing. A schedule you set earlier is different from a reaction.']}[L.res];h+=`<div class="fb ${m[0]}">${m[1]}</div>`}
+ h+=`<div class="card"><h3>WHAT YOU OWN</h3>${ks.length?ks.map(k=>{const hd=A.hold[k],cur=hd.units*px(k),ch=(cur/hd.cost-1)*100;return`<div class="ar" onclick="openAsset('${k}')">${ic(ASSETS[k].spr,32)}<div style="flex:1"><b>${ASSETS[k].n}</b><small>${hd.units.toFixed(2)} units</small></div><div style="text-align:right"><span style="font-size:22px">${fmt(cur)}</span><br><small style="color:${cur<hd.cost?'#e11d48':'#2b5e4a'}">${sgn(cur-hd.cost)} (${ch>=0?'+':''}${ch.toFixed(1)}%)</small></div></div>`}).join(''):`<p>Nothing yet.</p><button class="btn" onclick="nav('garden',null)">FIND SOMETHING TO BUY ▶</button>`}</div>`;
+ if(ks.length)h+=allocCard(A,val);
+ h+=activityCard(A);
+ const nb=badgeList().find(b=>!b[2]);
+ h+=`<div class="card"><span class="badge">SUGGESTIONS</span>${SUG.length?SUG.slice(0,3).map((s,i)=>`<div class="ar" onclick="sugGo(${i})">${ic(s.ico,28)}<div style="flex:1"><b>${s.t}</b><small>${s.d}</small></div><b class="h">▶</b></div>`).join(''):'<p>You are on track. Keep following your plan.</p>'}<p class="note">Educational prompts based on your numbers, not personal advice.</p></div>
+ ${nb?`<div class="card" style="display:flex;gap:10px;align-items:center;cursor:pointer" onclick="nav('play',null)">${ic(nb[0],36)}<div style="flex:1"><span class="badge g">NEXT REWARD</span><br><b class="h" style="font-size:9px">${nb[1]}</b><br><small>${nb[3]}</small></div><b class="h">▶</b></div>`:''}`;
+ h+=goalMini();
+ if(!autoSyms().includes(S.auto.sym))S.auto.sym=autoSyms()[0];
+ h+=`<div class="card"><span class="badge">AUTO-INVEST</span><p>Same buy every month. Habit beats timing.</p><div class="seg">${autoSyms().map(k=>`<button class="${S.auto.sym===k?'on':''}" onclick="S.auto.sym='${k}';render()">${k}</button>`).join('')}</div>
+ <div class="lab"><span>Each month</span><b id="aamt">${fmt(S.auto.amt)}</b></div><input type="range" min="5" max="${S.inv.cap}" step="5" value="${Math.min(S.auto.amt,S.inv.cap)}" oninput="S.auto.amt=+this.value;$('#aamt').textContent='$'+this.value">
+ <button class="btn ${S.auto.on?'g':'w'}" onclick="toggleAuto()">AUTO-INVEST: ${S.auto.on?'ON':'OFF'}</button></div>
+ <p class="note">Use the clock bar above (PLAY, +1D, +1W, +1M) to move time forward. All funds are fictional. Education, not advice. Judge yourself on following your plan, not the daily balance.</p>`;
+ setHTML(h);
+}
+function rTrade(){
+ if(S.sub)return({asset:rAsset,review:rReview,done:rOrderDone,sell:rSell,sold:rSold})[S.sub]();
+ const A=acct();
+ setHTML(`${modeSeg()}<h2>MARKET</h2><div class="sub" style="margin:0 0 6px">Find something to buy.</div><input id="q" type="text" placeholder="Search companies, tickers, sectors…" value="${S.q.replace(/"/g,'&quot;')}" oninput="S.q=this.value;exList()" style="margin:0 0 6px">
+ <div class="sub" style="margin:0 0 4px">Cash ${fmt(A.cash)} · Cap left this month ${fmt(Math.max(0,S.inv.cap-A.spent))}</div>
+ <h3>WHAT ARE YOU AIMING FOR?</h3><div class="seg">${Object.keys(PREFS).map(k=>`<button class="${S.pref===k?'on':''}" onclick="setPref('${k}')">${PREFS[k].n}</button>`).join('')}</div>
+ <p class="note" style="margin:0 0 8px">${PREFS[S.pref].d} Simulated, never guaranteed.</p>
+ <div class="card" style="padding:4px 10px"><span class="badge y">PICKS FOR YOUR GOAL</span>${pickList().map(k=>assetRow(k)).join('')}</div>
+ <h3>BROWSE EVERYTHING</h3><div class="seg">${['all','steady','balanced','growth'].map(f=>`<button class="${S.filter===f?'on':''}" onclick="S.filter='${f}';render()">${f.toUpperCase()}</button>`).join('')}</div>
+ <div class="card" style="padding:4px 10px" id="exl">${exRows()}</div>
+ <p class="note">${Object.keys(ASSETS).length} fictional funds and stocks. Real company search needs a live market-data provider. "~%/yr sim" is a simulated average, never guaranteed. Education, not advice.</p>`);
+}
+const SCOL=['#2b5e4a','#e8743b','#8b5cf6','#38bdf8','#f4c542','#e11d48','#5f9f6e','#7a4a2b'];
+function allocCard(A,val){const ks=Object.keys(A.hold),share=k=>A.hold[k].units*px(k)/val*100;
+ return`<div class="card"><h3>WHERE YOUR MONEY IS</h3><div class="stack">${ks.map((k,i)=>`<div style="width:${share(k)}%;background:${SCOL[i%8]}"></div>`).join('')}</div>${ks.map((k,i)=>`<div class="lab"><span><i class="sq" style="background:${SCOL[i%8]}"></i> ${k} · ${ASSETS[k].n}</span><b>${share(k).toFixed(0)}%</b></div>`).join('')}</div>`}
+function exRows(){const q=S.q.trim().toLowerCase(),ks=Object.keys(ASSETS).filter(k=>(S.filter==='all'||ASSETS[k].goal===S.filter)&&(!q||(k+' '+ASSETS[k].n+' '+ASSETS[k].f+' '+(ASSETS[k].sector||'')).toLowerCase().includes(q)));return ks.length?ks.map(k=>assetRow(k)).join(''):'<p style="padding:8px">No matches. Try a ticker like BYTE or a sector like Energy.</p>'}
+function exList(){const e=$('#exl');if(e)e.innerHTML=exRows()}
+function rebalance(){const A=acct(),v=pvOf(A).v;let any=false;for(const k in A.hold){if(!ASSETS[k].single)continue;const hd=A.hold[k],cur=hd.units*px(k),ex=cur-v*.1;if(ex<=0)continue;const f=ex/cur;sellFrom(A,k,f);any=true}if(any){sc('align',5,'rebal');toast('Rebalanced')}render()}
+function openAsset(k){S.inv.from=S.tab==='garden'?'garden':'home';S.inv.sel=k;S.inv.ack=[false,false,false];S.inv.reason=null;nav('garden','asset')}
+const maxBuy=()=>Math.floor(Math.min(acct().cash,S.inv.cap-acct().spent));
+function rAsset(){
+ const k=S.inv.sel,a=ASSETS[k],A=acct(),mb=maxBuy(),hd=A.hold[k],ok=mb>=5;
+ if(S.inv.amt>mb)S.inv.amt=Math.max(5,mb);
+ setHTML(`<button class="back" onclick="nav('${S.inv.from||'garden'}',null)">◀ BACK</button><div style="display:flex;gap:12px;align-items:center">${ic(a.spr,64)}<div><h2>${a.n}</h2><div class="sub" style="margin:0">${a.f}</div></div></div>
+ <div class="card" style="margin-top:12px"><div class="lab"><b class="h" style="font-size:12px">${fmt2(px(k))}</b><span>per unit</span></div>${spark(k,330,90)}</div>
+ <div class="card"><div class="lab"><span>Risk</span><span>${sq(a.risk)}</span></div><div class="lab"><span>Fees</span><span>${a.fee}</span></div><div class="lab"><span>Spread</span><span>${a.div}</span></div>
+ <p class="note">${a.single?'Can lose most of its value. Treat it as money you could lose entirely.':'Simulated average ~'+simYr(k).toFixed(1)+'%/yr, never guaranteed. Funds can fall in a bad year.'}</p></div>
+ ${hd?`<div class="card"><h3>YOUR POSITION</h3><div class="grid"><div class="stat"><b>${fmt2(hd.units*px(k))}</b><span>Worth now</span></div><div class="stat"><b>${fmt2(hd.cost)}</b><span>You paid</span></div><div class="stat"><b style="color:${hd.units*px(k)<hd.cost?'#e11d48':'#2b5e4a'}">${sgn(hd.units*px(k)-hd.cost)}</b><span>Gain / loss</span></div></div></div>`:''}
+ <div class="card"><h3>BUY</h3>${mb<5?'<p>Monthly cap reached or no cash. Move time forward with the clock bar.</p>':`<div class="lab"><button class="seg" style="all:unset;cursor:pointer;font:400 14px 'Press Start 2P'" onclick="S.inv.amt=Math.max(5,S.inv.amt-5);render()">−</button><b class="h" style="font-size:14px">${fmt(S.inv.amt)}</b><button style="all:unset;cursor:pointer;font:400 14px 'Press Start 2P'" onclick="S.inv.amt=Math.min(${mb},S.inv.amt+5);render()">+</button></div>`}
+ <button class="btn" ${ok?'':'disabled'} onclick="nav('garden','review')">REVIEW ▶</button>
+ ${hd?`<button class="btn r" onclick="S.inv.sellSym='${k}';S.inv.sellReason=null;S.inv.sellPct=100;nav('garden','sell')">SELL</button>`:''}</div>`);
+}
+function rReview(){
+ const v=S.inv,k=v.sel,a=ASSETS[k],real=S.mode==='real';
+ const f=v.amt*feeRate(k),u=(v.amt-f)/px(k);
+ setHTML(`<button class="back" onclick="nav('garden','asset')">◀ BACK</button><h2>REVIEW ORDER</h2><div class="sub">${real?'Simulated partner order.':'Practice order.'}</div>
+ <div class="card"><table><tr><td class="l">Buy</td><td>${k} · ${a.n}</td></tr><tr><td class="l">Amount</td><td>${fmt(v.amt)}</td></tr><tr><td class="l">Price</td><td>${fmt2(px(k))}</td></tr><tr><td class="l">Fee (${(feeRate(k)*100).toFixed(1)}%)</td><td>${fmt2(f)}</td></tr><tr><td class="l">You get</td><td>${u.toFixed(3)} units</td></tr></table>
+ <p class="note">${a.single?'Single stocks can lose most of their value. ':''}Investments can lose money.</p>
+ <button class="btn" onclick="placeOrder()">${real?'APPROVE ORDER':'BUY NOW'}</button></div>`);
+}
+function placeOrder(){const v=S.inv,A=acct(),k=v.sel,amt=v.amt;if(amt>maxBuy()||amt<5)return;const f=buyInto(A,k,amt);v.placed={k,amt,fee:f};nav('garden','done')}
+function rOrderDone(){const p=S.inv.placed;
+ setHTML(`<div class="card" style="margin-top:16px;text-align:center">${ic(ASSETS[p.k].spr,64)}<h3>BOUGHT ${fmt(p.amt)}</h3><p>Fee ${fmt2(p.fee)}. Worth ${fmt2(p.amt-p.fee)} right now: ${sgn(-p.fee)} (${(-p.fee/p.amt*100).toFixed(2)}%) to start. From here it moves with the market.</p><p>${ASSETS[p.k].n} (${S.mode==='real'?'simulated real':'practice'})</p><div class="fb">No XP for buying. ${APP_NAME} never rewards trading more or earning more.</div><button class="btn" onclick="nav('home',null)">▶ SEE MY PORTFOLIO</button><button class="btn w" onclick="nav('play',null)">BACK TO QUESTS</button></div>`)}
+function rSell(){const v=S.inv,k=v.sellSym,hd=acct().hold[k];if(!hd){nav('garden',null);return}
+ const pct=v.sellPct/100,cur=hd.units*px(k),gross=cur*pct,f=gross*feeRate(k),net=gross-f,cost=hd.cost*pct,pl=net-cost,R={plan:'Part of my plan (need money / rebalance)',fear:'Prices fell and I am scared'};
+ setHTML(`<button class="back" onclick="nav('garden','asset')">◀ BACK</button><h2>SELL ${k}</h2><div class="card"><div class="seg">${[25,50,75,100].map(p=>`<button class="${v.sellPct===p?'on':''}" onclick="S.inv.sellPct=${p};render()">${p}%</button>`).join('')}</div>
+ <table><tr><td class="l">You receive (after fee ${fmt2(f)})</td><td>${fmt2(net)}</td></tr><tr><td class="l">You paid for this part</td><td>${fmt2(cost)}</td></tr><tr><td class="l"><b>${pl<0?'You would LOSE':'You would GAIN'}</b></td><td><b style="color:${pl<0?'#e11d48':'#2b5e4a'}">${sgn(pl)} (${(pl/cost*100).toFixed(2)}%)</b></td></tr></table>
+ ${pl<0?'<p class="note">Selling now locks in this loss. Prices can recover or fall further. Decide by your plan, not by fear.</p>':''}
+ <button class="btn r" onclick="doSell()">SELL ${v.sellPct}% (SIM)</button></div>`)}
+function doSell(){const A=acct(),k=S.inv.sellSym;if(!A.hold[k])return;const r=sellFrom(A,k,S.inv.sellPct/100);r.reason=S.inv.sellReason;S.inv.sold=r;nav('garden','sold')}
+function rSold(){const r=S.inv.sold,w=r.pl>=0;
+ setHTML(`<div class="card" style="margin-top:16px;text-align:center">${ic(ASSETS[r.k].spr,64)}<span class="badge ${w?'g':'r'}">${w?'GAIN':'LOSS'}</span><h3>SOLD ${r.k}</h3>
+ <table><tr><td class="l">You received</td><td>${fmt2(r.net)}</td></tr><tr><td class="l">You paid</td><td>${fmt2(r.cost)}</td></tr><tr><td class="l">Fee</td><td>${fmt2(r.fee)}</td></tr><tr><td class="l"><b>Result</b></td><td><b style="color:${w?'#2b5e4a':'#e11d48'}">${sgn(r.pl)} (${(r.pl/r.cost*100).toFixed(2)}%)</b></td></tr></table>
+ <div class="fb ${w?'good':'warn'}">${w?'A realized gain. Taxes and real-world fees would reduce it in a real account.':'A realized loss. Losses are a normal part of investing; what matters is whether the decision fit your plan.'}</div>
+ <button class="btn" onclick="nav('home',null)">▶ SEE MY PORTFOLIO</button></div>`)}
+
+/* ---------- MONEY (stash, debts, rearrange) ---------- */
+const freeCash=()=>{const M=S.money;return M.income-M.ess-M.card.min-M.loan.min};
+function nper(B,apr,P){const r=apr/1200;if(B<=0)return 0;if(P<=r*B)return Infinity;return r?-Math.log(1-r*B/P)/Math.log(1+r):B/P}
+function setAl(k,v){const o=S.money.al,f=freeCash();o[k]=v;const s=o.cush+o.debt+o.inv;if(s>f)o[k]=v-(s-f);render()}
+function autoArr(){
+ const M=S.money,f=freeCash(),r5=x=>Math.round(x/5)*5,hi=M.card.bal>0;let c,d,i;
+ if(M.sav<500){c=r5(f*.5);d=hi?r5(f*.4):0}else if(hi){c=r5(f*.1);d=r5(f*.6)}else{c=r5(f*.2);d=0}
+ i=Math.max(0,f-c-d);M.al={cush:c,debt:d,inv:i};sc('align',5,'arr');toast('Arranged!');render();
+}
+function rMoney(){
+ const M=S.money,A=acct(),gv=pvOf(A).v,debt=M.card.bal+M.loan.bal,net=M.sav+gv-debt,sub=M.msub;
+ let h=`<div class="seg"><button class="${sub==='stash'?'on':''}" onclick="S.money.msub='stash';render()">MY STASH</button><button class="${sub==='arr'?'on':''}" onclick="S.money.msub='arr';render()">REARRANGE</button></div>`;
+ if(sub==='stash'){
+  const mx=Math.max(M.sav,gv,debt,1),row=(ico,n,v,c)=>`<div class="lab"><span style="display:flex;gap:8px;align-items:center">${ic(ico,24)}${n}</span><b>${fmt(v)}</b></div><div class="meter" style="height:12px"><i style="width:${v/mx*100}%;${c?'background:'+c:''}"></i></div>`;
+  h+=`<div class="card"><span class="badge">NET WORTH</span><h2 class="h" style="font-size:16px;margin:4px 0 8px">${fmt(net)}</h2>${row('coin','SAVINGS',M.sav)}${row('tree','INVESTED ('+(S.mode==='real'?'real sim':'practice')+')',gv)}${row('ghost','DEBT',debt,'repeating-linear-gradient(90deg,#e11d48 0 6px,#9f1239 6px 8px)')}</div>
+  <div class="card"><span class="badge">CUSHION</span><div class="lab"><span>Starter goal $500</span><b>${fmt(M.sav)}</b></div><div class="meter"><i style="width:${Math.min(100,M.sav/5)}%"></i></div><p class="note">One month of essentials is ${fmt(M.ess)}.</p></div>`;
+  [['card','CREDIT CARD',M.card],['loan','STUDENT LOAN',M.loan]].forEach(([k,n,d])=>{const mo=nper(d.bal,d.apr,d.min+(k==='card'?M.al.debt:0)),it=isFinite(mo)?(d.min+(k==='card'?M.al.debt:0))*mo-d.bal:0;
+   h+=`<div class="card"><span class="badge r">${n}</span><div class="grid"><div class="stat"><b>${fmt(d.bal)}</b><span>Owed</span></div><div class="stat"><b>${d.apr}%</b><span>APR</span></div><div class="stat"><b>${isFinite(mo)?Math.ceil(mo)+'mo':'never'}</b><span>To pay off</span></div></div><p class="note">Min ${fmt(d.min)}/mo. Est. interest ${fmt(it)}.</p></div>`});
+  h+=`<button class="btn" onclick="S.money.msub='arr';render()">▶ REARRANGE MY MONEY</button>`;
+ }else{
+  const f=freeCash(),al=M.al,fun=f-al.cush-al.debt-al.inv,cm=al.cush>0?Math.max(0,Math.ceil((500-M.sav)/al.cush)):Infinity,dp=M.card.min+al.debt,dm=nper(M.card.bal,M.card.apr,dp),di=isFinite(dm)?dp*dm-M.card.bal:0;
+  const step=M.sav<500?1:M.card.bal>0?2:3;
+  h+=`<div class="card"><span class="badge y">FREE CASH EACH MONTH</span><h2 class="h" style="font-size:16px;margin:4px 0">${fmt(f)}</h2><p class="note">Income ${fmt(M.income)} minus essentials ${fmt(M.ess)} and minimum payments.</p></div>
+  <div class="card">${[['cush','SAVINGS CUSHION'],['debt','EXTRA CARD PAYMENT'],['inv','INVESTING']].map(([k,n])=>`<div class="lab"><span>${n}</span><b>${fmt(al[k])}</b></div><input type="range" min="0" max="${f}" step="5" value="${al[k]}" oninput="setAl('${k}',+this.value)">`).join('')}
+  <div class="lab"><span>FUN MONEY (the rest)</span><b>${fmt(fun)}</b></div>
+  <button class="btn" onclick="autoArr()">✨ AUTO-ARRANGE</button></div>
+  <div class="card"><span class="badge">WHAT THIS DOES</span><p>Cushion hits $500 in <b>${isFinite(cm)?cm+' months':'never'}</b>.<br>Card paid off in <b>${isFinite(dm)?Math.ceil(dm)+' months':'never'}</b>, interest ${fmt(di)}.<br>Investing gets <b>${fmt(al.inv)}</b>/mo, ${fmt(al.inv*60)} over 5 years before gains, losses and fees.</p></div>
+  <div class="card"><span class="badge">GOOD ORDER</span>${['Small cushion','Pay costly debt','Invest steadily','Extra on low-rate loans'].map((t,i)=>`<div class="ar" style="cursor:default"><div class="pip ${i+1<step?'done':i+1===step?'next':''}" style="width:34px;height:34px;cursor:default">${i+1<step?'✓':i+1}</div><b>${t.toUpperCase()}</b></div>`).join('')}<p class="note">A rule of thumb, not personal advice. These changes apply to your next months on HOME (+1 MONTH).</p></div>`;
+ }
+ setHTML(h);
+}
+
+/* ---------- LEARN ---------- */
+const OPTS_INFO=[
+ {id:'cash',ico:'coin',t:'CASH & T-BILLS',risk:1,q:'TRZ',line:'Short-term, very steady',what:'You lend money to the government for a short time, or hold a savings-style fund. Prices barely move.',good:'Money you need within 1-3 years: an emergency cushion, a trip, tuition.',watch:'Returns are low and can trail rising prices (inflation).',ex:'T-Bill Trust (TRZ)'},
+ {id:'bond',ico:'bush',t:'BONDS',risk:2,q:'Bonds',line:'Loans that pay interest',what:'A bond is a loan to a government or company that pays interest. A bond fund holds many of them.',good:'Smoothing the ups and downs of a portfolio and earning steadier income.',watch:'Prices fall when interest rates rise, and a borrower can fail to repay.',ex:'Bond Bush (BDX)'},
+ {id:'div',ico:'sun',t:'DIVIDEND FUNDS',risk:2,q:'Dividend',line:'Established firms that share profits',what:'Funds of established companies that regularly pay part of their profits to owners.',good:'People who want income plus some growth.',watch:'Dividends are not guaranteed and can be cut. Prices still move with the market.',ex:'Steady Payer (DVD)'},
+ {id:'index',ico:'tree',t:'INDEX FUNDS & ETFs',risk:3,q:'Index fund',line:'The whole market in one buy',what:'One purchase that holds hundreds or thousands of companies and tracks a market. Fees are low and you are instantly diversified.',good:'The core of many long-term plans, especially for beginners.',watch:'The whole market can fall 20% or more in a bad year. Plan on a 5+ year horizon.',ex:'Index Tree (TMF), Globe Vine (GLX)'},
+ {id:'reit',ico:'tree',t:'REAL ESTATE (REITs)',risk:3,q:'Real estate',line:'Property without buying a building',what:'Companies that own property and pass most income to shareholders.',good:'Income and a different mix than stocks and bonds.',watch:'Sensitive to interest rates and property cycles.',ex:'CozyNest Homes (HOME)'},
+ {id:'sector',ico:'gem',t:'SECTOR & THEME FUNDS',risk:4,q:'Technology fund',line:'Funds focused on one area',what:'Funds concentrated in one area such as technology or energy.',good:'A small "satellite" slice next to a core fund, if you believe in a sector.',watch:'Less spread out, so swings are bigger and hot trends can reverse.',ex:'Tech Leaders (TCH)'},
+ {id:'stock',ico:'star',t:'INDIVIDUAL STOCKS',risk:4,q:'single stock',line:'A piece of one company',what:'You own a small share of one company. Its price follows that company\'s results and news.',good:'A small slice (many people cap each stock near 5-10%) in companies you understand.',watch:'One bad report can crush the price. There is no diversification safety net.',ex:'ByteForge (BYTE), VoltWave (BOLT), Maple Bank (BANK) and more'},
+ {id:'spec',ico:'mush',t:'HOT TIPS & SPECULATION',risk:5,q:'Speculative',line:'Buzz, trends, "can\'t miss"',what:'Very volatile bets driven by buzz, tips or trends.',good:'Only money you could lose entirely, if at all.',watch:'Social-media hype and "can\'t miss" stories are classic warning signs.',ex:'Hot Mushroom (HOT), Rocket Co. (SPC)'}];
+const STRATS=[
+ {id:'s1',ico:'coin',t:'CUSHION FIRST',pts:['Keep one to three months of essentials in cash-like savings before investing.','It stops a surprise bill from forcing you to sell at a bad time.','Start with $500 and build from there.'],cta:'OPEN MY MONEY',go:"nav('money',null)"},
+ {id:'s2',ico:'globe',t:'SPREAD IT OUT',pts:['Own many companies and asset types, not one.','A fund does this in a single purchase.','Rule of thumb: keep each single stock to a small slice of your portfolio.'],cta:'BROWSE FUNDS',go:"learnTry('fund')"},
+ {id:'s3',ico:'clock',t:'INVEST A LITTLE EVERY MONTH',pts:['Buying the same amount on a schedule means more units when prices are low and fewer when high.','It removes the pressure of finding a perfect day.','It does not guarantee a profit or prevent a loss.'],cta:'SET AUTO-INVEST',go:"nav('home',null)"},
+ {id:'s4',ico:'bush',t:'MATCH RISK TO YOUR TIMELINE',pts:['Needed within about 3 years: lean toward cash and short bonds.','5+ years away: stocks and stock funds can make sense, dips and all.','The longer your timeline, the more ups and downs you can usually ride out.'],cta:'SEE STEADY PICKS',go:"S.filter='steady';learnTry('')"},
+ {id:'s5',ico:'sun',t:'WATCH THE FEES',pts:['A 1% yearly fee is about $1 of every $100 invested, every year, win or lose.','Broad index funds often cost well under 0.2%.','Check the fee line on each fund page before you buy.'],cta:'COMPARE FUNDS',go:"learnTry('fund')"},
+ {id:'s6',ico:'bolt',t:'HAVE A PLAN FOR DIPS',pts:['Drops of 10% happen fairly often. Drops of 20% or more happen every few years.','Decide ahead of time: hold unless your goal or timeline changed.','Selling after a fall locks in the loss. Buying extra to "win it back" is loss chasing.'],cta:'WATCH A DIP (CLOCK)',go:"nav('home',null)"},
+ {id:'s7',ico:'ghost',t:'PAY COSTLY DEBT FIRST',pts:['A card charging 22% costs more each year than stock markets have averaged over long periods (roughly 7-10% before inflation, never guaranteed).','Pay high-interest debt before investing beyond a small start.','Low-rate loans can usually wait.'],cta:'REARRANGE MY MONEY',go:"S.money.msub='arr';nav('money',null)"},
+ {id:'s8',ico:'star',t:'REBALANCE NOW AND THEN',pts:['Winners grow into a bigger share of your portfolio.','Once or twice a year, trim what got too big and add to what shrank.','Do it by plan, not by mood.'],cta:'OPEN MY PORTFOLIO',go:"nav('home',null)"},
+ {id:'s9',ico:'heart',t:'KNOW YOUR ACCOUNT TYPES',pts:['Many countries have tax-advantaged retirement accounts (in the US: 401(k) at work and IRAs).','An employer match is extra pay you should not leave behind.','Rules differ by country and change over time. A qualified tax professional can help.'],cta:'',go:''}];
+const TRAPS_TXT=[
+ {id:'t1',ico:'mush',t:'FOMO & SOCIAL PROOF',what:'"Everyone is making money" feeds and countdown timers create urgency. Feeds show winners, not the many who lost or broke even.',do:'Wait 24 hours. Look at how most buyers did, not the best story.'},
+ {id:'t2',ico:'heart',t:'LOSS AVERSION & CHASING',what:'A loss often stings about twice as much as an equal gain feels good. That pushes people to bet again immediately to get even.',do:'Treat a loss as already spent. Ask: would I buy this today if I had not lost anything?'},
+ {id:'t3',ico:'star',t:'OVERCONFIDENCE',what:'Charts, ratings and live stats make guessing feel like skill. Lucky streaks look like talent.',do:'Prefer a simple plan and broad funds over predictions.'},
+ {id:'t4',ico:'gem',t:'GAMIFIED APPS',what:'Streaks, confetti and rankings tied to trading can nudge people to trade more and take more risk.',do:'Reward yourself for following your plan, not for activity.'},
+ {id:'t5',ico:'clock',t:'LATE-NIGHT ONE-TAP TRADING',what:'Trading alone, late, from a notification removes the pauses that normally slow impulsive choices.',do:'Turn off trade alerts. Use a monthly cap and schedule orders for daytime.'},
+ {id:'t6',ico:'bolt',t:'THE THRILL OF THE WAIT',what:'The excitement is strongest while an outcome is pending, which is why live tickers and constant refreshing are so sticky.',do:'Check your portfolio on a schedule, such as weekly, not minute by minute.'}];
+function openL(id){S.openL=S.openL===id?null:id;if(S.openL)sc('trade',1,'rd'+id);render()}
+function learnTry(q){S.q=q;S.filter=S.filter==='steady'&&q===''?'steady':'all';nav('garden',null)}
+function rLearn(){
+ const segs=[['options','OPTIONS'],['strategy','STRATEGY'],['traps','MIND TRAPS']];
+ const item=(id,ico,t,sub,body)=>{const open=S.openL===id;return`<div class="card" style="padding:8px"><div class="ar" style="border:0;padding:2px 0" onclick="openL('${id}')">${ic(ico,32)}<div style="flex:1"><b>${t}</b><small>${sub}</small></div><b class="h">${open?'−':'+'}</b></div>${open?body:''}</div>`};
+ let h=`<div class="seg">${segs.map(s=>`<button class="${S.lsub===s[0]?'on':''}" onclick="S.lsub='${s[0]}';S.openL=null;render()">${s[1]}</button>`).join('')}</div>`;
+ if(S.lsub==='options')h+=`<div class="sub">The main places people put money, from calmest to wildest. Tap one to read more.</div>`+OPTS_INFO.map(o=>item(o.id,o.ico,o.t,sq(o.risk)+' '+o.line,`<p><b>WHAT IT IS:</b> ${o.what}</p><p><b>GOOD FOR:</b> ${o.good}</p><p><b>WATCH OUT:</b> ${o.watch}</p><p><b>IN THIS APP:</b> ${o.ex}</p><button class="btn" onclick="learnTry('${o.q}')">FIND IN EXPLORE ▶</button>`)).join('');
+ else if(S.lsub==='strategy')h+=`<div class="sub">Habits that help most people, in plain language.</div>`+STRATS.map(s=>item(s.id,s.ico,s.t,s.pts[0].slice(0,48)+'…',`<p>${s.pts.map(x=>'• '+x).join('<br>')}</p>${s.cta?`<button class="btn" onclick="${s.go}">${s.cta} ▶</button>`:''}`)).join('');
+ else h+=`<div class="sub">Common ways apps and emotions push people into risky choices, and what to do instead.</div>`+TRAPS_TXT.map(t=>item(t.id,t.ico,t.t,t.what.slice(0,48)+'…',`<p>${t.what}</p><div class="fb good"><b>DO THIS:</b> ${t.do}</div>`)).join('');
+ setHTML(h+`<p class="note">General education, not personal advice. Past results do not guarantee future results. Fund and company names in this demo are fictional.</p>`);
+}
+
+
+/* ---------- ABOUT (judges' notes, rules, demo switches) ---------- */
+function rAbout(){
+ const T2=(a,b)=>`<tr><td class="l">${a}</td><td class="l">${b}</td></tr>`;
+ setHTML(`<button class="back" onclick="nav('play',null)">◀ BACK</button><h2>ABOUT</h2>
+ <div class="card"><span class="badge">WISDOM SCORE ${total()}/100</span>${Object.keys(SC_MAX).map(k=>`<div class="lab"><span>${SC_LAB[k]}</span><b>${S.sc[k]}/${SC_MAX[k]}</b></div><div class="meter" style="height:12px"><i style="width:${S.sc[k]/SC_MAX[k]*100}%"></i></div>`).join('')}
+ <p class="note">Rewards: First Move badge, consistency XP (following or thoughtfully revising a plan), sponsor milestone reward. No points for trades, amounts invested, spending or returns.</p></div>
+ <div class="card"><span class="badge">DESIGN COUNTERS</span><table><tr><th class="l">Tactic</th><th class="l">Our counter</th></tr>${T2('Anticipation','One reveal, no re-play')}${T2('Illusion of control','Base rates, not signals')}${T2('Loss chasing','Pause and reflect first')}${T2('Near-misses','Plain "not this time"')}${T2('One-tap, late night','Quiet hours, caps, 24h holds')}${T2('Gamification','Points for plans, never trades')}${T2('FOMO','No timers or winner feeds')}</table></div>
+ <div class="card"><span class="badge">ROADMAP</span><p><b>1 · 6-month pilot:</b> simulated + practice brokerage, readiness, habits, 200 students.<br><b>2:</b> licensed broker partner for eligible adults, self-directed, with compliance.<br><b>3:</b> automated contribution plans and account-based tracking where permitted.</p><p class="note">REAL mode here is a simulated connection. Real trades need a brokerage agreement, ID checks, disclosures and regulatory review.</p></div>
+ <div class="card"><span class="badge">PROPOSED TARGETS</span><div class="grid"><div class="stat"><b>70%</b><span>First action in 7 days</span></div><div class="stat"><b>50%</b><span>4-week follow-through</span></div><div class="stat"><b>200</b><span>Participants</span></div></div><p class="note">Targets to test, not results.</p></div>
+ <div class="card"><span class="badge">SAFEGUARDS</span><div class="lab"><span>Buying cap / month</span><b id="capv">${fmt(S.inv.cap)}</b></div><input type="range" min="20" max="300" step="10" value="${S.inv.cap}" oninput="S.inv.cap=+this.value;$('#capv').textContent='$'+this.value"></div>
+ <div class="card"><span class="badge y">DEMO SWITCHES</span><label class="ck"><input type="checkbox" ${S.unlock?'checked':''} onchange="S.unlock=this.checked;render()"><span>Unlock every quest</span></label><button class="btn w" onclick="if(confirm('Reset the demo?')){stopGame();stopClock();S=fresh();render()}">↺ RESET DEMO</button></div>`);
+}
+
+/* ---------- self test (open with #selftest) ---------- */
+function selftest(){
+ let out;
+ try{
+  S.onb=3;
+  [['play'],['garden'],['money'],['learn'],['about']].forEach(t=>{nav(t[0],null);if(!$('#screen').innerHTML)throw'empty '+t[0]});
+  ['replay','mission','weekly'].forEach(s=>nav('play',s));S.goalSort='closest';nav('play',null);S.gsub='world';nav('play',null);S.user.joined=true;S.user.name='TestUser1';['dec','hab','goal'].forEach(b=>{S.user.board=b;nav('play',null)});S.user.joined=false;S.gsub='goals';S.saveTarget=300;S.goalSort='priority';nav('play',null);
+  tryOpt('a');tryOpt('b');tryOpt('c');lockChoice();pickMission('savings');S.first.steps=[true,true,true];finishMission();S.linked='manual';nav('play','mission');
+  nav('home',null);setPref('steady');setPref('growth');setPref('balanced');S.range='3M';nav('home',null);S.range='ALL';S.filter='growth';nav('garden',null);S.filter='all';nav('garden',null);setMode('real');nav('home',null);S.q='energy';nav('garden',null);exList();S.q='';
+  openAsset('TMF');S.inv.amt=50;nav('garden','review');S.inv.ack=[true,true,true,true];placeOrder();
+  openAsset('BYTE');S.inv.amt=20;S.inv.reason='research';S.inv.ack=[true,true,true,true];nav('garden','review');placeOrder();nav('garden','done');
+  tickDays(1);tickDays(7);if(S.mk.d!==8)throw'clock '+S.mk.d;tickDays(22);if(S.mk.m!==1||S.mk.d!==0)throw'month roll';
+  openAsset('BYTE');nav('garden','asset');
+  for(let i=0;i<3;i++)tickDays(30);
+  if(!S.inv.lesson)throw'no lesson';
+  S.inv.sellSym='BYTE';S.inv.sellPct=50;S.inv.sellReason='plan';nav('garden','sell');doSell();if(S.sub!=='sold')throw'sold';nav('garden','sold');if(acct().log.length<3)throw'log';nav('home',null);
+  if(!S.inv.lesson)throw'no lesson';lesson('hold');nav('garden',null);rebalance();
+  S.inv.sellSym='HOT';S.inv.sellReason='plan';nav('garden','sell');doSell();setMode('practice');
+  nav('money',null);S.money.msub='arr';nav('money',null);autoArr();setAl('inv',90);nav('money',null);
+  ['options','strategy','traps'].forEach(s=>{S.lsub=s;nav('learn',null);(s==='options'?OPTS_INFO:s==='strategy'?STRATS:TRAPS_TXT).forEach(x=>{openL(x.id);if(!$('#screen').innerHTML.includes("openL('"+x.id))throw'learn '+x.id})});learnTry('fund');nav('home',null);
+  S.pending=true;S.rescue='pick';nav('play','weekly');S.rescue='money';nav('play','weekly');revise();review();review();review();nav('play','weekly');
+  nav('play',null);stopGame();clearInterval(T);clearInterval(FT);
+  out='SELFTEST OK score='+total()+' season='+S.mk.m+' title='+titleOf();
+ }catch(e){out='SELFTEST FAIL '+(e&&e.stack?e.stack:e)}
+ const d=document.createElement('pre');d.id='testout';d.textContent=out;document.body.appendChild(d);
+}
+render();
+if(location.hash==='#selftest')selftest();
+</script>
+</body>
+</html>
